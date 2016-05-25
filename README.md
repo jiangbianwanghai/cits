@@ -1,2 +1,2 @@
 # cits
-cits(Chocolcate issue tracker system)
+cits(chocolcate issue tracker system)
