@@ -35,7 +35,7 @@
           &copy; 2016. All Rights Reserved.
       </div>
       <div class="pull-right">
-          有问题请联系: <a href="mailto:webmaster@jiangbianwanghai.com" target="_blank">江边望海</a>
+          Page rendered in <strong>{elapsed_time}</strong> seconds.
       </div>
     </div>
   </div><!-- signin -->

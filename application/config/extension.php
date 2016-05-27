@@ -6,13 +6,13 @@
 //通用
 $config['system'] = array(
     //静态资源主机地址
-    'static_host' => 'http://static.cits.org.cn',
+    'static_host' => 'http://static.cits.gongchang.net',
     //上传文件主机地址
-    'file_host' => 'http://file.cits.org.cn',
+    'file_host' => 'http://file.cits.gongchang.net',
     //禁止注册的用户名
     'forbidden_username' => array('admin', 'webmaster', 'administrator', 'manage'),
     //API主机地址
-    'api_host' => 'http://api.cits.org.cn'
+    'api_host' => 'http://api.cits.gongchang.net'
 );
 
 //翻页

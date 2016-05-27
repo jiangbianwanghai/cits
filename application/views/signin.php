@@ -36,7 +36,7 @@
             &copy; 2016. All Rights Reserved.
         </div>
         <div class="pull-right">
-            有问题请联系: <a href="mailto:webmaster@jiangbianwanghai.com" target="_blank">江边望海</a>
+            Page rendered in <strong>{elapsed_time}</strong> seconds.
         </div>
     </div>
   </div><!-- signin -->
@@ -45,7 +45,7 @@
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
 <script type="text/javascript">
 
-  //
+  //验证登录函数
   function login() {
     $.ajax({
       type: "POST",
