@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="description" content="CITS - Chocolate Issue Tracker System">
   <meta name="author" content="jiangbianwanghai">
-  <link rel="shortcut icon" href="<?php echo STATIC_HOST; ?>images/favicon.png" type="image/png">
+  <link rel="shortcut icon" href="<?php echo STATIC_HOST; ?>/images/favicon.png" type="image/png">
   <title><?php echo $PAGE_TITLE; ?> - CITS</title>
   <link href="<?php echo STATIC_HOST; ?>/css/style.default.css" rel="stylesheet">
   <link href="<?php echo STATIC_HOST; ?>/css/jquery.gritter.css" rel="stylesheet">

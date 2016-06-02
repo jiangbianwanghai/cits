@@ -12,7 +12,9 @@ $config['system'] = array(
     //禁止注册的用户名
     'forbidden_username' => array('admin', 'webmaster', 'administrator', 'manage'),
     //API主机地址
-    'api_host' => 'http://api.cits.gongchang.net'
+    'api_host' => 'http://api.cits.gongchang.net',
+    //头像主机地址
+    'avatar_host' => 'http://avatar.cits.gongchang.net',
 );
 
 //翻页

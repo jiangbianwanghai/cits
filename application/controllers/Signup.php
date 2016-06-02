@@ -66,6 +66,9 @@ class Signup extends CI_Controller {
             if ($output['status']) {
                 $auth = serialize(array('user_id' => $output['data'], 'user_name' => $this->input->post('username'), 'real_name' => $this->input->post('username')));
                 $this->input->set_cookie('cits_auth', $this->encryption->encrypt($auth), 43200); //缓存半天，再登录让他完善其他信息
+                $this->input->set_cookie('cits_user_online', time(), 43200);
+                $this->load->model('Model_online', 'online', TRUE);
+                $this->online->updateByUnique(array('uid' => $output['data'], 'act_time' => time()));
                 exit(json_encode(array('status' => true, 'message' => '注册成功')));
             } else {
                 exit(json_encode(array('status' => false, 'error' => '注册失败')));
