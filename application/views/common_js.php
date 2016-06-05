@@ -7,3 +7,7 @@
 <script src="<?php echo STATIC_HOST; ?>/js/jquery.cookies.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/toggles.min.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/jquery.gritter.min.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/jquery.validate.min.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/jquery.form.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>

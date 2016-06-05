@@ -14,7 +14,7 @@ class Dashboard extends CI_Controller {
 		//刷新在线用户列表
 		$this->load->model('Model_online', 'online', TRUE);
 		$onlineUsers = $this->online->users();
-		$this->online->refreshOnline(UID);
+		$this->online->refresh(UID);
 		$data['online_users'] = $onlineUsers;
         $this->load->view('home', $data);
 	}
@@ -27,7 +27,7 @@ class Dashboard extends CI_Controller {
         delete_cookie('cits_auth');
         delete_cookie('cits_user_online');
         $this->load->model('Model_online', 'online', TRUE);
-        $this->online->delByUid(UID);
+        $this->online->del_by_uid(UID);
         redirect('/', 'location');
 	}
 }

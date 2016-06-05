@@ -1,8 +1,9 @@
 <?php
 //载入项目缓存文件
 $project = array();
-if (file_exists(APPPATH.'/cache/project.conf.php')) {
-  require APPPATH.'cache/project.conf.php';
+if (file_exists(APPPATH.'/cache/project.cache.php')) {
+  $project = file_get_contents(APPPATH.'/cache/project.cache.php');
+  $project = unserialize($project);
 }
 //载入用户缓存文件
 $users = array();
@@ -106,17 +107,10 @@ if (file_exists(APPPATH.'/cache/users.conf.php')) {
         <div class="form-group">
           <label class="col-sm-3 control-label">简介 <span class="asterisk">*</span></label>
           <div class="col-sm-9">
-            <textarea rows="5" class="form-control" id="project_discription" name="project_discription" required></textarea>
+            <textarea rows="5" class="form-control" id="project_description" name="project_description" required></textarea>
           </div>
         </div>
       </div>
-      <?php
-      $csrf = array(
-          'name' => $this->security->get_csrf_token_name(),
-          'hash' => $this->security->get_csrf_hash()
-      );
-      ?>
-      <input type="hidden" name="<?=$csrf['name'];?>" value="<?=$csrf['hash'];?>" />
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
         <button class="btn btn-primary" id="btnSubmit-project">提交</button>

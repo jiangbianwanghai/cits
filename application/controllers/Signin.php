@@ -37,7 +37,7 @@ class Signin extends CI_Controller {
                 $this->input->set_cookie('cits_auth', $this->encryption->encrypt($auth), 86400*5);
                 $this->input->set_cookie('cits_user_online', time(), 86400);
                 $this->load->model('Model_online', 'online', TRUE);
-                $this->online->updateByUnique(array('uid' => $output['data']['uid'], 'act_time' => time()));
+                $this->online->update_by_unique(array('uid' => $output['data']['uid'], 'act_time' => time()));
                 exit(json_encode(array('status' => true, 'message' => '验证通过')));
             }
         } else {

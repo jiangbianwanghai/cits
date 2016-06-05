@@ -153,8 +153,11 @@ class MY_Model extends CI_Model {
 
     /**
      * 根据唯一索引更新数据
+     *
+     * @param array $data 更新字段需要包含唯一索引
+     * @return boolean 布尔
      */
-    public function updateByUnique($data) {
+    public function update_by_unique($data) {
         $customDB = $this->load->database($this->dbgroup, TRUE);
         return $customDB->replace($this->table, $data);
     }
