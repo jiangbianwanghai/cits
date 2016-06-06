@@ -4,10 +4,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Dashboard extends CI_Controller {
 
 	public function index() {
-		/*$this->load->library('encryption');
-		$auth =  unserialize($this->encryption->decrypt($this->input->cookie('cits_auth')));
-		print_r($auth);
-		echo '<a href="/dashboard/logout">退出</a>';*/
 
 		$data['PAGE_TITLE'] = '我的面板';
 
@@ -16,6 +12,7 @@ class Dashboard extends CI_Controller {
 		$onlineUsers = $this->online->users();
 		$this->online->refresh(UID);
 		$data['online_users'] = $onlineUsers;
+        
         $this->load->view('home', $data);
 	}
 
@@ -26,6 +23,7 @@ class Dashboard extends CI_Controller {
 		$this->load->helper(array('cookie', 'url'));
         delete_cookie('cits_auth');
         delete_cookie('cits_user_online');
+        delete_cookie('cits_star_project');
         $this->load->model('Model_online', 'online', TRUE);
         $this->online->del_by_uid(UID);
         redirect('/', 'location');

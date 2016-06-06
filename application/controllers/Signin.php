@@ -33,11 +33,29 @@ class Signin extends CI_Controller {
             if (!$output['status']) {
                 exit(json_encode(array('status' => false, 'error' => $output['error'])));
             } else {
+                //这是Cookie
                 $auth = serialize(array('user_id' => $output['data']['uid'], 'user_name' => $output['data']['username'], 'real_name' => $output['data']['realname']));
                 $this->input->set_cookie('cits_auth', $this->encryption->encrypt($auth), 86400*5);
                 $this->input->set_cookie('cits_user_online', time(), 86400);
+
+                //更新在线时间戳
                 $this->load->model('Model_online', 'online', TRUE);
                 $this->online->update_by_unique(array('uid' => $output['data']['uid'], 'act_time' => time()));
+
+                //从个人信息中获取
+                $api = $this->curl->get($system['api_host'].'/users/row?uid='.$output['data']['uid']);
+                if ($api['httpcode'] == 200) {
+                    $output = json_decode($api['output'], true);
+                    if ($output['status']) {
+                        if ($output['data']['star_project']) {
+                            $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']['star_project']), 86400*5);
+                            $data['star'] =  unserialize($output['data']['star_project']);
+                        }
+                    }
+                } else {
+                    exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+                }
+                
                 exit(json_encode(array('status' => true, 'message' => '验证通过')));
             }
         } else {

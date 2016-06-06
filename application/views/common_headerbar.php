@@ -18,20 +18,36 @@ if (file_exists(APPPATH.'/cache/users.conf.php')) {
       <li class="active"><a href="/"><i class="fa fa-home"></i> <span>我的面板</span></a></li>
       <li class="nav-parent"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-list"></i> <span id="curr-project">
         <?php
-        if ($this->input->cookie('projectId') && isset($project[$this->input->cookie('projectId')])) {
-          echo $project[$this->input->cookie('projectId')]['project_name']; 
+        if ($this->input->cookie('cits_curr_project')) {
+          echo $project[$this->encryption->decrypt($this->input->cookie('cits_curr_project'))]['project_name']; 
         } else { echo '请选择项目团队'; }
         ?></span> <span class="caret"></span></a>
         <ul class="dropdown-menu children">
           <?php
-          if ($project) {
-            foreach ($project as $key => $value) {
-              echo "<li><a href=\"javascript:;\" class=\"set-project\" project=\"".$value['project_name']."\">".$value['project_name']."</a></li>";
+          if ($this->input->cookie('cits_star_project') && $project) {
+            $star = unserialize($this->encryption->decrypt($this->input->cookie('cits_star_project'))); //从Cookie中获取
+            $i = 1;
+            foreach ($star as $k => $v) {
+              echo "<li><a href=\"javascript:;\" class=\"set-project\" projectid=\"".$project[$v]['sha']."\" projectname=\"".$project[$v]['project_name']."\">".$project[$v]['project_name']."</a></li>";
+              if ($i >= 10) {
+                break;
+              }
+              $i++;
             }
-            echo "<li class=\"divider\"></li>";
+          } elseif($project) {
+            $i = 1;
+            foreach ($project as $key => $value) {
+              echo "<li><a href=\"javascript:;\" class=\"set-project\" projectid=\"".$value['sha']."\" projectname=\"".$value['project_name']."\">".$value['project_name']."</a></li>";
+              if ($i >= 10) {
+                break;
+              }
+              $i++;
+            }
           }
+          echo "<li><a href=\"/project\"><small>查看项目团队列表</small></a></li>";
+          echo "<li class=\"divider\"></li>";
           ?>
-          <li><a href="javascript:;" data-toggle="modal" data-target="#myModal-project">添加项目团队</a></li>
+          <li><a href="javascript:;" data-toggle="modal" data-target="#myModal-project">创建项目团队</a></li>
         </ul>
       </li>
       <li>

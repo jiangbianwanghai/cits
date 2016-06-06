@@ -20,8 +20,8 @@
         <div class="col-sm-3 col-lg-2">
           <h5 class="subtitle">快捷方式</h5>
           <ul class="nav nav-pills nav-stacked nav-email mb20">
-            <li><a href="/project"><i class="glyphicon glyphicon-folder-close"></i> 所有项目团队</a></li>
-            <li><a href="/project/my"><i class="glyphicon glyphicon-folder-close"></i> 我的项目团队</a></li>
+            <li<?php if ($folder == 'all') echo ' class="active"' ;?>><a href="/project"><i class="glyphicon glyphicon-folder-<?php if ($folder == 'all') { echo 'open';} else { echo 'close';}?>"></i> 所有项目团队</a></li>
+            <li<?php if ($folder == 'my') echo ' class="active"' ;?>><a href="/project/index/my"><i class="glyphicon glyphicon-folder-<?php if ($folder == 'my') { echo 'open';} else { echo 'close';}?>"></i> 我的项目团队</a></li>
           </ul>
         </div>
         <div class="col-sm-9 col-lg-10">
@@ -44,18 +44,20 @@
                             echo '<tr><td colspan="8"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
                           }
                         $timeGroup[$timeDay] = 1;
+                        $sha = $this->encryption->encrypt($value['id']);
+                        $md5 = md5($value['id']);
                     ?>
-                    <tr class="unread" id="item-<?php echo $value['id'];?>">
+                    <tr class="unread" id="item-<?php echo $md5;?>">
                       <td>
                         <div class="ckbox ckbox-success">
-                          <input type="checkbox" class="chk" name="itemchk" id="checkbox<?php echo $value['id'];?>" value="<?php echo $value['id'];?>">
-                          <label for="checkbox<?php echo $value['id'];?>"></label>
+                          <input type="checkbox" class="chk" name="itemchk" id="checkbox<?php echo $md5;?>" value="<?php echo $sha;?>">
+                          <label for="checkbox<?php echo $md5;?>"></label>
                         </div>
                       </td>
                       <td>
-                        <a href="javascript:;" item-id="<?php echo $value['id'];?>" class="star<?php if ($this->uri->segment(2, '') == 'star') { echo ' star-checked'; } else { if (isset($star[$value['id']])) echo ' star-checked'; }?>"><i class="glyphicon glyphicon-star"></i></a>
+                        <a href="javascript:;" item-id="<?php echo $sha;?>" class="star<?php if ($this->uri->segment(2, '') == 'star') { echo ' star-checked'; } else { if (in_array($value['id'], $star)) echo ' star-checked'; }?>"><i class="glyphicon glyphicon-star"></i></a>
                       </td>
-                      <td class="description" projectid="<?php echo $value['id'];?>"><?php echo $value['project_name']; ?></td>
+                      <td class="description" projectid="<?php echo $md5;?>"><?php echo $value['project_name']; ?></td>
                       <td align="center" width="50">
                         <a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left">
                           <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username'].'.jpg'; ?>" align="absmiddle" title="项目团队创始人：<?php echo $users[$value['add_user']]['realname'];?>"></div>
@@ -63,7 +65,7 @@
                       </td>
                       <td width="140"><span class="media-meta pull-right"><?php echo date("Y/m/d H:i", $value['add_time'])?></span></td>
                     </tr>
-                    <tr id="description-<?php echo $value['id'];?>" style="display:none;"><td colspan="5" style="background-color:#fff;"><div style="padding:10px;line-height:1.2em"><blockquote style="font-size:14px;"><i class="fa fa-quote-left"></i><p><?php echo $value['project_discription']; ?></p><small><?php echo $value['project_name']; ?> 的简介</small></blockquote></div></td></tr>
+                    <tr id="description-<?php echo $md5;?>" style="display:none;"><td colspan="5" style="background-color:#fff;"><div style="padding:10px;line-height:1.2em"><blockquote style="font-size:14px;"><i class="fa fa-quote-left"></i><p><?php echo $value['project_discription']; ?></p><small><?php echo $value['project_name']; ?> 的简介</small></blockquote></div></td></tr>
                     <?php
                         }
                       } else {
@@ -77,7 +79,8 @@
               </div><!-- table-responsive -->
             </div><!-- panel-body -->
           </div><!-- panel -->
-        </div>
+        </div><!-- col-sm-9 -->
+        <p class="text-right"><small>页面执行时间 <em>{elapsed_time}</em> 秒 使用内存 {memory_usage}</small></p>
       </div>
     </div><!-- contentpanel -->
   </div><!-- mainpanel -->
@@ -106,9 +109,10 @@ $(document).ready(function(){
         jQuery(this).addClass('star-checked');
         var id = jQuery(this).attr('item-id');
         $.ajax({
-          type: "GET",
+          type: "POST",
           dataType: "JSON",
-          url: "/project/star_add?id="+id,
+          url: "/project/star_add",
+          data: {'id':id},
           success: function(data){
             if (data.status) {
               jQuery.gritter.add({
@@ -133,9 +137,10 @@ $(document).ready(function(){
       jQuery(this).removeClass('star-checked');
       var id = jQuery(this).attr('item-id');
       $.ajax({
-        type: "GET",
+        type: "POST",
         dataType: "JSON",
-        url: "/project/star_del?id="+id,
+        url: "/project/star_del",
+        data: {'id':id},
         success: function(data){
           if (data.status) {
             jQuery.gritter.add({
