@@ -18,7 +18,7 @@ if (file_exists(APPPATH.'/cache/users.conf.php')) {
       <li class="active"><a href="/"><i class="fa fa-home"></i> <span>我的面板</span></a></li>
       <li class="nav-parent"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-list"></i> <span id="curr-project">
         <?php
-        if ($this->input->cookie('projectId')&& isset($project[$this->input->cookie('projectId')])) {
+        if ($this->input->cookie('projectId') && isset($project[$this->input->cookie('projectId')])) {
           echo $project[$this->input->cookie('projectId')]['project_name']; 
         } else { echo '请选择项目团队'; }
         ?></span> <span class="caret"></span></a>
@@ -26,7 +26,7 @@ if (file_exists(APPPATH.'/cache/users.conf.php')) {
           <?php
           if ($project) {
             foreach ($project as $key => $value) {
-              echo "<li><a href=\"javascript:;\" class=\"set-project\" md5=\"".$value['md5']."\" project=\"".$value['project_name']."\">".$value['project_name']."</a></li>";
+              echo "<li><a href=\"javascript:;\" class=\"set-project\" project=\"".$value['project_name']."\">".$value['project_name']."</a></li>";
             }
             echo "<li class=\"divider\"></li>";
           }
