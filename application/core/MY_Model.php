@@ -42,32 +42,26 @@ class MY_Model extends CI_Model {
      * @param  integer $limit 步长
      * @return array | false
      */
-    public function fetchAll($field = array(), $where = '', $order = '', $offset = 0, $limit = 5)
+    public function get_rows($field = array(), $where = array(), $order = array(), $limit = 20, $offset = 0)
     {
-        $result = false;
+        $customDB = $this->load->database($this->dbgroup, TRUE);
         if ($field)
             $fieldStr = "`".implode("`,`", $field)."`";
         else
             $fieldStr = "*";
-        if ($where)
-            $whereStr = " WHERE ".$where;
-        else
-            $whereStr = null;
-        if ($order)
-            $orderStr = " ORDER BY ".$order;
-        else
-            $orderStr = null;
-        $sql = "SELECT ".$fieldStr." FROM `".$this->table."`".$whereStr.$orderStr." LIMIT ".$offset.",".$limit;
-        //echo $sql."\n";
-        $customDB = $this->load->database($this->dbgroup, TRUE);
-        $query = $customDB->query($sql);
-        $customDB->close();
-        if ($query->num_rows() > 0) {
-            foreach ($query->result_array() as $row) {
-                $result[] = $row;
+        $customDB->select($fieldStr);
+        if ($where) {
+            $customDB->where($where);
+        }
+        if ($order) {
+            foreach ($order as $key => $value) {
+                $customDB->order_by($key, $value);
             }
         }
-        return $result;
+        $this->db->limit($limit, $offset);
+        $query = $customDB->get($this->table);
+        $customDB->close();
+        return $query->result_array();
     }
 
     /**
@@ -123,11 +117,11 @@ class MY_Model extends CI_Model {
      * @param  int $id   主键id
      * @return true|false
      */
-    public function updateById($data, $id)
+    public function update_by_where($data, $where)
     {
         $result = false;
         $customDB = $this->load->database($this->dbgroup, TRUE);
-        $result = $customDB->update($this->table, $data, array($this->primary=>$id));
+        $result = $customDB->update($this->table, $data, $where);
         $customDB->close();
         return $result;
     }
@@ -150,7 +144,7 @@ class MY_Model extends CI_Model {
             return false;
         }
     }
-
+    
     /**
      * 根据唯一索引更新数据
      *

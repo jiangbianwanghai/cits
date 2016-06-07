@@ -1,6 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
+/**
+ * 项目模块
+ */
 class Project extends CI_Controller {
 
     /**
@@ -12,6 +14,7 @@ class Project extends CI_Controller {
     {
         $data['PAGE_TITLE'] = '项目团队列表';
 
+        //读取系统配置信息
         $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
@@ -32,7 +35,7 @@ class Project extends CI_Controller {
                     }
                 }
             } else {
-                exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+                show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
             }
         }
 
@@ -50,13 +53,13 @@ class Project extends CI_Controller {
                 $data['rows'] = $output['data'];
             }
         } else {
-            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
         //刷新在线用户列表
         $this->load->model('Model_online', 'online', TRUE);
-        $onlineUsers = $this->online->users();
         $this->online->refresh(UID);
+        $onlineUsers = $this->online->users();
         $data['online_users'] = $onlineUsers;
 
         $this->load->view('project', $data);
@@ -70,7 +73,7 @@ class Project extends CI_Controller {
         //验证输入
         $this->load->library(array('form_validation', 'curl', 'encryption'));
         $this->form_validation->set_rules('project_name', '项目团队全称', 'trim|required');
-        $this->form_validation->set_rules('project_description', '描述', 'trim');
+        $this->form_validation->set_rules('project_description', '描述', 'trim|required');
         if ($this->form_validation->run() == FALSE) {
             exit(json_encode(array('status' => false, 'error' => validation_errors())));
         }
@@ -87,9 +90,9 @@ class Project extends CI_Controller {
             if ($output['status']) {
                 //刷新项目团队缓存文件
                 $this->refresh();
-                exit(json_encode(array('status' => true, 'message' => '操作成功')));
+                exit(json_encode(array('status' => true, 'message' => '创建成功')));
             } else {
-                exit(json_encode(array('status' => false, 'error' => '操作失败')));
+                exit(json_encode(array('status' => false, 'error' => '创建失败')));
             }
         } else {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
@@ -97,9 +100,9 @@ class Project extends CI_Controller {
     }
 
     /**
-     * 添加星标项目
+     * 添加关注项目
      *
-     * 星标项目完成后会对Cookie和用户的表进行更新
+     * 关注项目完成后会对Cookie和用户的表进行更新
      */
     public function star_add()
     {
@@ -125,9 +128,9 @@ class Project extends CI_Controller {
             if ($output['status']) {
                 //更新Cookie
                 $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']), 86400*5);
-                exit(json_encode(array('status' => true, 'message' => '标记成功')));
+                exit(json_encode(array('status' => true, 'message' => '添加关注成功')));
             } else {
-                exit(json_encode(array('status' => false, 'error' => '标记失败'.$output['error'])));
+                exit(json_encode(array('status' => false, 'error' => '添加标记失败'.$output['error'])));
             }
         } else {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
@@ -135,9 +138,9 @@ class Project extends CI_Controller {
     }
 
     /**
-     * 删除星标项目
+     * 删除关注项目
      *
-     * 星标项目完成后会对Cookie和用户的表进行更新
+     * 关注项目完成后会对Cookie和用户的表进行更新
      */
     public function star_del()
     {
@@ -169,9 +172,9 @@ class Project extends CI_Controller {
                     $this->load->helper('cookie');
                     delete_cookie('cits_star_project');
                 }
-                exit(json_encode(array('status' => true, 'message' => '取消成功')));
+                exit(json_encode(array('status' => true, 'message' => '取消关注成功')));
             } else {
-                exit(json_encode(array('status' => false, 'error' => '取消失败'.$output['error'])));
+                exit(json_encode(array('status' => false, 'error' => '取消关注失败'.$output['error'])));
             }
         } else {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
@@ -179,11 +182,11 @@ class Project extends CI_Controller {
     }
 
     /**
-     * 刷新缓存文件
+     * 刷新项目团队缓存文件
      */
     public function refresh()
     {
-        $this->load->library('curl');
+        $this->load->library(array('curl', 'encryption'));
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $api = $this->curl->get($system['api_host'].'/project/cache');

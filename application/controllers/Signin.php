@@ -3,11 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Signin extends CI_Controller {
 
-	/**
+    /**
      * 登录面板
      */
-	public function index() {
-		$data['PAGE_TITLE'] = '登录';
+    public function index() {
+        $data['PAGE_TITLE'] = '登录';
         $this->load->view('signin', $data);
     }
 
@@ -49,7 +49,6 @@ class Signin extends CI_Controller {
                     if ($output['status']) {
                         if ($output['data']['star_project']) {
                             $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']['star_project']), 86400*5);
-                            $data['star'] =  unserialize($output['data']['star_project']);
                         }
                     }
                 } else {
