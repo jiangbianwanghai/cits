@@ -50,13 +50,13 @@ class Project extends CI_Controller {
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
-                $data['rows'] = $output['data'];
+                $data['rows'] = $output['content']['data'];
             }
         } else {
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
-        //刷新在线用户列表
+        //刷新在线用户列表（埋点）
         $this->load->model('Model_online', 'online', TRUE);
         $this->online->refresh(UID);
         $onlineUsers = $this->online->users();

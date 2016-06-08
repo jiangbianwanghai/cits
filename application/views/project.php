@@ -87,6 +87,8 @@
   <?php include('common_tab.php');?>
 </section>
 <?php include('common_js.php');?>
+<script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>
 <script>
 $(document).ready(function(){
   //开启和关闭项目团队简介

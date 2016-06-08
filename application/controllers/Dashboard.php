@@ -9,7 +9,7 @@ class Dashboard extends CI_Controller {
 
         $data['PAGE_TITLE'] = '我的面板';
 
-        //刷新在线用户列表
+        //刷新在线用户列表（埋点）
         $this->load->model('Model_online', 'online', TRUE);
         $this->online->refresh(UID);
         $onlineUsers = $this->online->users();

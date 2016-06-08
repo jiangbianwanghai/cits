@@ -63,7 +63,7 @@ if (file_exists(APPPATH.'/cache/users.conf.php')) {
       <li>
         <div class="btn-group">
           <button class="btn btn-default dropdown-toggle tp-icon" data-toggle="dropdown">
-            <i class="glyphicon glyphicon-globe"></i>
+            <i class="fa fa-bell"></i>
             <span class="badge">5</span>
           </button>
           <div class="dropdown-menu dropdown-menu-head pull-right">
