@@ -25,13 +25,13 @@ class Project extends CI_Controller {
             $data['star'] = unserialize($this->encryption->decrypt($this->input->cookie('cits_star_project'))); //从Cookie中获取
         } else {
             //从个人信息中获取
-            $api = $this->curl->get($system['api_host'].'/users/row?uid='.UID);
+            $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID);
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
-                    if ($output['data']['star_project']) {
-                        $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']['star_project']), 86400*5);
-                        $data['star'] =  unserialize($output['data']['star_project']);
+                    if ($output['content']['star_project']) {
+                        $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['content']['star_project']), 86400*5);
+                        $data['star'] =  unserialize($output['content']['star_project']);
                     }
                 }
             } else {
@@ -90,6 +90,22 @@ class Project extends CI_Controller {
             if ($output['status']) {
                 //刷新项目团队缓存文件
                 $this->refresh();
+                //写入操作日志
+                $Post_data_handle['sender'] = UID;
+                $Post_data_handle['action'] = '创建';
+                $Post_data_handle['target'] = $output['content'];
+                $Post_data_handle['target_type'] = 1;
+                $Post_data_handle['type'] = 1;
+                $Post_data_handle['content'] = $this->input->post('project_name');
+                $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+                if ($api['httpcode'] == 200) {
+                    $output = json_decode($api['output'], true);
+                    if (!$output['status']) {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
                 exit(json_encode(array('status' => true, 'message' => '创建成功')));
             } else {
                 exit(json_encode(array('status' => false, 'error' => '创建失败')));
@@ -122,12 +138,12 @@ class Project extends CI_Controller {
         $Post_data['uid'] = UID;
 
         //更新到用户表中
-        $api = $this->curl->post($system['api_host'].'/users/star_project_add', $Post_data);
+        $api = $this->curl->post($system['api_host'].'/user/star_project_add', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
                 //更新Cookie
-                $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']), 86400*5);
+                $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['content']), 86400*5);
                 exit(json_encode(array('status' => true, 'message' => '添加关注成功')));
             } else {
                 exit(json_encode(array('status' => false, 'error' => '添加标记失败'.$output['error'])));
@@ -161,13 +177,13 @@ class Project extends CI_Controller {
         $Post_data['uid'] = UID;
 
         //更新到用户表中
-        $api = $this->curl->post($system['api_host'].'/users/star_project_del', $Post_data);
+        $api = $this->curl->post($system['api_host'].'/user/star_project_del', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
                 //更新Cookie
-                if ($output['data']) {
-                    $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']), 86400*5);
+                if ($output['content']) {
+                    $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['content']), 86400*5);
                 } else {
                     $this->load->helper('cookie');
                     delete_cookie('cits_star_project');
@@ -194,11 +210,11 @@ class Project extends CI_Controller {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
                 $this->load->helper('file');
-                foreach ($output['data'] as $key => $value) {
+                foreach ($output['content']['data'] as $key => $value) {
                     $rows[$value['id']] = $value;
                     $rows[$value['id']]['sha'] = $this->encryption->encrypt($value['id']);
                 }
-                echo write_file(APPPATH.'/cache/project.cache.php', serialize($rows));
+                write_file(APPPATH.'/cache/project.cache.php', serialize($rows));
             }
         } else {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));

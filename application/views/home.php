@@ -23,5 +23,6 @@
 </section>
 <?php include('common_js.php');?>
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>
 </body>
 </html>

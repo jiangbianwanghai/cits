@@ -28,7 +28,11 @@ class User extends CI_Controller {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
                 $this->load->helper('file');
-                echo write_file(APPPATH.'/cache/user.cache.php', serialize($output['content']));
+                foreach ($output['content']['data'] as $key => $value) {
+                    $rows[$value['uid']] = $value;
+                    $rows[$value['uid']]['sha'] = $this->encryption->encrypt($value['uid']);
+                }
+                write_file(APPPATH.'/cache/user.cache.php', serialize($rows));
             }
         } else {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
