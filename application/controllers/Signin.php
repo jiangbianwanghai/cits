@@ -27,28 +27,28 @@ class Signin extends CI_Controller {
         //存在性验证
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/users/signin_check?username='.$this->input->post('username').'&password='.md5($this->input->post('password')));
+        $api = $this->curl->get($system['api_host'].'/user/signin_check?username='.$this->input->post('username').'&password='.md5($this->input->post('password')));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
                 exit(json_encode(array('status' => false, 'error' => $output['error'])));
             } else {
                 //这是Cookie
-                $auth = serialize(array('user_id' => $output['data']['uid'], 'user_name' => $output['data']['username'], 'real_name' => $output['data']['realname']));
+                $auth = serialize(array('user_id' => $output['content']['uid'], 'user_name' => $output['content']['username'], 'real_name' => $output['content']['realname']));
                 $this->input->set_cookie('cits_auth', $this->encryption->encrypt($auth), 86400*5);
                 $this->input->set_cookie('cits_user_online', time(), 86400);
 
                 //更新在线时间戳
                 $this->load->model('Model_online', 'online', TRUE);
-                $this->online->update_by_unique(array('uid' => $output['data']['uid'], 'act_time' => time()));
+                $this->online->update_by_unique(array('uid' => $output['content']['uid'], 'act_time' => time()));
 
                 //从个人信息中获取
-                $api = $this->curl->get($system['api_host'].'/users/row?uid='.$output['data']['uid']);
+                $api = $this->curl->get($system['api_host'].'/user/row?uid='.$output['content']['uid']);
                 if ($api['httpcode'] == 200) {
                     $output = json_decode($api['output'], true);
                     if ($output['status']) {
-                        if ($output['data']['star_project']) {
-                            $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['data']['star_project']), 86400*5);
+                        if ($output['content']['star_project']) {
+                            $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['content']['star_project']), 86400*5);
                         }
                     }
                 } else {

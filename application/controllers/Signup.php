@@ -36,7 +36,7 @@ class Signup extends CI_Controller {
 
         //唯一性验证
         //邮箱
-        $api = $this->curl->get($system['api_host'].'/users/check_email?email='.$this->input->post('email'));
+        $api = $this->curl->get($system['api_host'].'/user/check_email?email='.$this->input->post('email'));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
@@ -46,7 +46,7 @@ class Signup extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
         //用户名
-        $api = $this->curl->get($system['api_host'].'/users/check_username?username='.$this->input->post('username'));
+        $api = $this->curl->get($system['api_host'].'/user/check_username?username='.$this->input->post('username'));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
@@ -60,17 +60,17 @@ class Signup extends CI_Controller {
         $Post_data['email'] = $this->input->post('email');
         $Post_data['username'] = $this->input->post('username');
         $Post_data['password'] = md5($this->input->post('password'));
-        $api = $this->curl->post($system['api_host'].'/users/write', $Post_data);
+        $api = $this->curl->post($system['api_host'].'/user/write', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
-                $auth = serialize(array('user_id' => $output['data'], 'user_name' => $this->input->post('username'), 'real_name' => $this->input->post('username')));
+                $auth = serialize(array('user_id' => $output['content'], 'user_name' => $this->input->post('username'), 'real_name' => $this->input->post('username')));
                 $this->input->set_cookie('cits_auth', $this->encryption->encrypt($auth), 43200); //缓存半天，再登录让他完善其他信息
                 
                 //更新在线时间戳
                 $this->input->set_cookie('cits_user_online', time(), 43200);
                 $this->load->model('Model_online', 'online', TRUE);
-                $this->online->update_by_unique(array('uid' => $output['data'], 'act_time' => time()));
+                $this->online->update_by_unique(array('uid' => $output['content'], 'act_time' => time()));
                 exit(json_encode(array('status' => true, 'message' => '注册成功')));
             } else {
                 exit(json_encode(array('status' => false, 'error' => '注册失败')));

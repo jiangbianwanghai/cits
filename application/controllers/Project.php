@@ -204,6 +204,5 @@ class Project extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
     }
-
-
+    
 }

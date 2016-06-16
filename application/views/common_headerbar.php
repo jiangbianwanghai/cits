@@ -7,8 +7,9 @@ if (file_exists(APPPATH.'/cache/project.cache.php')) {
 }
 //载入用户缓存文件
 $users = array();
-if (file_exists(APPPATH.'/cache/users.conf.php')) {
-  require APPPATH.'cache/users.conf.php';
+if (file_exists(APPPATH.'/cache/user.cache.php')) {
+  $users = file_get_contents(APPPATH.'/cache/user.cache.php');
+  $users = unserialize($users);
 }
 ?>
 <div class="headerbar">
