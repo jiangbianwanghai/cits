@@ -9,6 +9,8 @@ $config['system'] = array(
     'static_host' => 'http://static.cits.gongchang.net',
     //上传文件主机地址
     'file_host' => 'http://file.cits.gongchang.net',
+    //上传文件地址
+    'file_dir' => '/mnt/lqm/upload',
     //禁止注册的用户名
     'forbidden_username' => array('admin', 'webmaster', 'administrator', 'manage'),
     //API主机地址

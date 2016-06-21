@@ -90,8 +90,104 @@ class Issue extends CI_Controller {
         $this->load->view('issue_add', $data);
     }
 
+    /**
+     * 写入任务信息
+     *
+     */
     public function add_ajax()
     {
+        $this->__init();
 
+        //验证输入
+        $this->load->library(array('form_validation', 'curl'));
+        $this->form_validation->set_rules('planid', '所属计划ID', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        $this->form_validation->set_rules('type', '类型', 'trim|required|is_natural_no_zero|max_length[1]',
+            array(
+                'required' => '%s 不能为空',
+                'is_natural_no_zero' => '类型[ '.$this->input->post('type').' ]不符合规则',
+                'max_length' => '类型[ '.$this->input->post('type').' ]太长了'
+            )
+        );
+        $this->form_validation->set_rules('level', '优先级', 'trim|required|is_natural_no_zero|max_length[1]',
+            array(
+                'required' => '%s 不能为空',
+                'is_natural_no_zero' => '优先级[ '.$this->input->post('level').' ]不符合规则',
+                'max_length' => '优先级[ '.$this->input->post('level').' ]太长了'
+            )
+        );
+        $this->form_validation->set_rules('issue_name', '任务标题', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        $this->form_validation->set_rules('issue_summary', '任务详情', 'trim');
+        $this->form_validation->set_rules('issue_url', '相关链接', 'trim');
+        $this->form_validation->set_rules('accept_user', '受理人ID', 'trim|required|is_natural_no_zero',
+            array(
+                'required' => '%s 不能为空',
+                'is_natural_no_zero' => '类型[ '.$this->input->post('accept_user').' ]不符合规则'
+            )
+        );
+        if ($this->form_validation->run() == FALSE) {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.validation_errors());
+            exit(json_encode(array('status' => false, 'error' => validation_errors())));
+        }
+
+        //解析planid
+        $planid = $this->input->post('planid');
+        if ($planid) {
+            $planid = $this->encryption->decrypt($planid);
+            if (!($planid != 0 && ctype_digit($planid))) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':计划id错误');
+                exit(json_encode(array('status' => false, 'error' => '计划id错误')));
+            }
+        }
+
+        //写入数据
+        $Post_data['issue_name'] = $this->input->post('issue_name');
+        $Post_data['issue_summary'] = $this->input->post('issue_summary');
+        $Post_data['project_id'] = $this->_projectid;
+        $Post_data['plan_id'] = $planid;
+        $Post_data['level'] = $this->input->post('level');
+        $Post_data['type'] = $this->input->post('type');
+        $Post_data['add_user'] = UID;
+        $Post_data['accept_user'] = $this->input->post('accept_user');
+        //如果有相关链接就序列化它
+        if ($this->input->post('issue_url')) {
+            $Post_data['url'] = serialize(array_filter(explode(PHP_EOL, $this->input->post('issue_url'))));
+        }
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $api = $this->curl->post($system['api_host'].'/issue/write', $Post_data);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                //写入操作日志
+                $Post_data_handle['sender'] = UID;
+                $Post_data_handle['action'] = '创建';
+                $Post_data_handle['target'] = $output['content'];
+                $Post_data_handle['target_type'] = 3;
+                $Post_data_handle['type'] = 1;
+                $Post_data_handle['content'] = $this->input->post('issue_name');
+                $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+                if ($api['httpcode'] == 200) {
+                    $output_handle = json_decode($api['output'], true);
+                    if (!$output_handle['status']) {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output_handle['error']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+                exit(json_encode(array('status' => true, 'message' => '创建成功', 'content' => $output['content'])));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':创建失败：'.$output['error']);
+                exit(json_encode(array('status' => false, 'error' => '创建失败：'.$output['error'])));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入任务API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
     }
+
+    
 }

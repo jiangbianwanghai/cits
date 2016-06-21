@@ -48,11 +48,11 @@
                   </div>
                 </div>
                 <div class="col-sm-4 col-lg-3" style="padding-left:50px;">
-                  <?php if ($planRows) { ?>
+                  <?php if (!$planid && $planRows) { ?>
                   <div class="form-group">
                     <label class="control-label">所属计划 <span class="asterisk">*</span></label>
                     <div>
-                      <select id="plan_id" name="plan_id" class="select3" data-placeholder="请选择所属计划" required>
+                      <select id="planid" name="planid" class="select3" data-placeholder="请选择所属计划" required>
                         <option value=""></option>
                         <?php
                         foreach ($planRows as $key => $value) {
@@ -106,7 +106,7 @@
                 </div>
               </div><!-- panel-body -->
               <?php if ($planid) {?>
-              <input type="hidden" name="plan_id" value="<?php echo $planid;?>" />
+              <input type="hidden" name="planid" value="<?php echo $planid;?>" />
               <?php } ?>
               <div class="panel-footer">
                 <div class="row">
@@ -142,18 +142,18 @@ function callBack(data) {
     jQuery.gritter.add({
       title: '提醒',
       text: data.message,
-        class_name: 'growl-success',
+      class_name: 'growl-success',
       sticky: false,
       time: ''
     });
     setTimeout(function(){
-      location.href = data.url;
-    }, 2000);
+      location.href = '/issue/view/'+data.content;
+    }, 1000);
   } else {
     jQuery.gritter.add({
       title: '提醒',
-      text: data.message,
-        class_name: 'growl-danger',
+      text: data.error,
+      class_name: 'growl-danger',
       sticky: false,
       time: ''
     });
@@ -208,7 +208,7 @@ jQuery(document).ready(function(){
     defaultImage : '/static/simditor-2.3.6/images/image.png', //编辑器插入图片时使用的默认图片
     pasteImage: true,
     upload: {
-        url: '/att/upload',
+        url: '/dashboard/upload',
         fileKey: 'upload_file', //服务器端获取文件数据的参数名  
         connectionCount: 3,  
         leaveConfirm: '正在上传文件'

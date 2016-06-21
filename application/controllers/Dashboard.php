@@ -32,4 +32,32 @@ class Dashboard extends CI_Controller {
         $this->online->del_by_uid(UID);
         redirect('/', 'location');
     }
+
+    /**
+     * 图片上传
+     */
+    public function upload() {
+        if($_FILES['upload_file']) {
+            $dir_name = date("Ymd", time());
+            $this->config->load('extension', TRUE);
+            $system = $this->config->item('system', 'extension');
+            $dir = $system['file_dir'].'/'.$dir_name;
+            if (!is_dir($dir)) mkdir($dir, 0777);
+            $config['upload_path'] = $dir; 
+            $config['file_name'] = 'IMG_'.time();
+            $config['overwrite'] = TRUE;
+            $config["allowed_types"] = 'jpg|jpeg|png|gif';
+            $config["max_size"] = 2048;
+            $this->load->library('upload', $config);
+
+            if(!$this->upload->do_upload('upload_file')) {               
+                $error = $this->upload->display_errors();
+                echo '{"success": false,"msg": "'.$error.'"}';
+            } else {
+                $data['upload_data']=$this->upload->data();
+                $img=$data['upload_data']['file_name'];
+                echo '{"success": true,"file_path": "'.$system['file_host'].'/'.$dir_name.'/'.$img.'"}';                              
+            }  
+        }
+    }
 }
