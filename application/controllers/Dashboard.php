@@ -36,7 +36,8 @@ class Dashboard extends CI_Controller {
     /**
      * 图片上传
      */
-    public function upload() {
+    public function upload()
+    {
         if($_FILES['upload_file']) {
             $dir_name = date("Ymd", time());
             $this->config->load('extension', TRUE);
@@ -58,6 +59,47 @@ class Dashboard extends CI_Controller {
                 $img=$data['upload_data']['file_name'];
                 echo '{"success": true,"file_path": "'.$system['file_host'].'/'.$dir_name.'/'.$img.'"}';                              
             }  
+        }
+    }
+
+    public function get_notify()
+    {
+        //获得消息记录
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $api = $this->curl->get($system['api_host'].'/notify/get_rows?uid='.UID);
+        if ($api['httpcode'] == 200) {
+            $users = array();
+            if (file_exists(APPPATH.'/cache/user.cache.php')) {
+              $users = file_get_contents(APPPATH.'/cache/user.cache.php');
+              $users = unserialize($users);
+            }
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                //print_r($output);
+                foreach ($output['content']['data'] as $key => $value) {
+                    $output['content']['data'][$key]['user_realname'] = $users[$value['user']]['realname'];
+                    $output['content']['data'][$key]['log_action'] = $value['log']['action'];
+                    $output['content']['data'][$key]['log_content'] = $value['log']['content'];
+                    
+                    if ($value['log']['target_type'] == '3') {
+                        $url = 'issue/view/'.$value['log']['target'];
+                        $output['content']['data'][$key]['log_target_type'] = '任务';
+                    }
+                    $output['content']['data'][$key]['log_url'] = $url;
+                    $output['content']['data'][$key]['log_target'] = $value['log']['target'];
+                    $output['content']['data'][$key]['log_sender_username'] = $users[$value['log']['sender']]['username'];
+                    $output['content']['data'][$key]['log_sender_realname'] = $users[$value['log']['sender']]['realname'];
+                }
+                $output['content']['datas'] = $output['content']['data'];
+                unset($output['content']['data']);
+                exit(json_encode($output['content']));
+            } else {
+                exit(json_encode(array('total' => 0)));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提醒API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
     }
 }

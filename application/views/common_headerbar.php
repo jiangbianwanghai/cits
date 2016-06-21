@@ -62,26 +62,10 @@ if (file_exists(APPPATH.'/cache/user.cache.php')) {
   <div class="header-right">
     <ul class="headermenu">
       <li>
-        <div class="btn-group">
-          <button class="btn btn-default dropdown-toggle tp-icon" data-toggle="dropdown">
-            <i class="fa fa-bell"></i>
-            <span class="badge">5</span>
+        <div class="btn-group" id="notify-content">
+          <button class="btn btn-default dropdown-toggle tp-icon" data-toggle="dropdown" id="notify-total">
+            <i class="fa fa-bell" id="bell"></i>
           </button>
-          <div class="dropdown-menu dropdown-menu-head pull-right">
-            <h5 class="title">你有5个新提醒</h5>
-            <ul class="dropdown-list gen-list">
-              <li class="new">
-                <a href="">
-                <span class="thumb"><img src="<?php echo AVATAR_HOST; ?>/changxiaoyang.jpg" alt="常晓阳" /></span>
-                <span class="desc">
-                  <span class="name">李研发 <span class="badge badge-success">未读</span></span>
-                  <span class="msg">创建了一个计划（planId#123）</span>
-                </span>
-                </a>
-              </li>
-              <li class="new"><a href="">查看所有通知</a></li>
-            </ul>
-          </div>
         </div>
       </li>
       <li>

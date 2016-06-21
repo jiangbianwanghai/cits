@@ -24,7 +24,7 @@ class acl{
         }
 
         //获取用户Cookie
-        $this->CI->load->library('encryption');
+        $this->CI->load->library(array('encryption', 'curl'));
         $auth =  unserialize($this->CI->encryption->decrypt($this->CI->input->cookie('cits_auth')));
         define('UID', $auth['user_id']);
         define('USER_NAME', $auth['user_name']);

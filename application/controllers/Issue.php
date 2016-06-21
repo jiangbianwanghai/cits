@@ -172,8 +172,21 @@ class Issue extends CI_Controller {
                 $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
                 if ($api['httpcode'] == 200) {
                     $output_handle = json_decode($api['output'], true);
-                    if (!$output_handle['status']) {
-                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output_handle['error']);
+                    if ($output_handle['status']) {
+                        //通知受理人
+                        $Post_data_notify['user'] = $this->input->post('accept_user');
+                        $Post_data_notify['log_id'] = $output_handle['content'];
+                        $api = $this->curl->post($system['api_host'].'/notify/write', $Post_data_notify);
+                        if ($api['httpcode'] == 200) {
+                            $output_notify = json_decode($api['output'], true);
+                            if (!$output_notify['status']) {
+                                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$output_notify['error']);
+                            }
+                        } else {
+                            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知API异常.HTTP_CODE['.$api['httpcode'].']');
+                        }
+                    } else {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
                     }
                 } else {
                     log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
