@@ -5,3 +5,4 @@
 !*/cache/index.html
 !*/cache/.htaccess
 *.DS_Store
+application/config/extension.php
