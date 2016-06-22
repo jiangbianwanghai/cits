@@ -67,6 +67,7 @@ class Dashboard extends CI_Controller {
         //获得消息记录
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl');
         $api = $this->curl->get($system['api_host'].'/notify/get_rows?uid='.UID);
         if ($api['httpcode'] == 200) {
             $users = array();
@@ -76,7 +77,6 @@ class Dashboard extends CI_Controller {
             }
             $output = json_decode($api['output'], true);
             if ($output['status']) {
-                //print_r($output);
                 foreach ($output['content']['data'] as $key => $value) {
                     $output['content']['data'][$key]['user_realname'] = $users[$value['user']]['realname'];
                     $output['content']['data'][$key]['log_action'] = $value['log']['action'];
