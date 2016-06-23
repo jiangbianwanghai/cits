@@ -90,6 +90,7 @@
  */
 function alphaid($in, $to_num = false, $pad_up = false, $pass_key = null)
 {
+    $salt = '7232275';
     $out   =   '';
     $index = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $base  = strlen($index);
@@ -132,7 +133,10 @@ function alphaid($in, $to_num = false, $pad_up = false, $pass_key = null)
                 $out -= pow($base, $pad_up);
             }
         }
+        $salt_len = strlen($salt);
+        $out = substr($out, $salt_len, strlen($out)-$salt_len);
     } else {
+        $in = $salt.$in;
         // Digital number  -->>  alphabet letter code
         if (is_numeric($pad_up)) {
             $pad_up--;

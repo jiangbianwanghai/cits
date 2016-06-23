@@ -147,6 +147,7 @@ class Project extends CI_Controller {
         $system = $this->config->item('system', 'extension');
         $Post_data['id'] = $id;
         $Post_data['uid'] = UID;
+        $Post_data['access_token'] = $system['access_token'];
 
         //更新到用户表中
         $api = $this->curl->post($system['api_host'].'/user/star_project_add', $Post_data);
@@ -157,9 +158,11 @@ class Project extends CI_Controller {
                 $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['content']), 86400*5);
                 exit(json_encode(array('status' => true, 'message' => '添加关注成功')));
             } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':添加标记失败'.$output['error']);
                 exit(json_encode(array('status' => false, 'error' => '添加标记失败'.$output['error'])));
             }
         } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
     }
@@ -186,6 +189,7 @@ class Project extends CI_Controller {
         $system = $this->config->item('system', 'extension');
         $Post_data['id'] = $id;
         $Post_data['uid'] = UID;
+        $Post_data['access_token'] = $system['access_token'];
 
         //更新到用户表中
         $api = $this->curl->post($system['api_host'].'/user/star_project_del', $Post_data);
@@ -201,9 +205,11 @@ class Project extends CI_Controller {
                 }
                 exit(json_encode(array('status' => true, 'message' => '取消关注成功')));
             } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':取消关注失败'.$output['error']);
                 exit(json_encode(array('status' => false, 'error' => '取消关注失败'.$output['error'])));
             }
         } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
     }

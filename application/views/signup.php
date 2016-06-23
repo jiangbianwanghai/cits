@@ -64,6 +64,7 @@
             location.href = '/';
           }, 1000);
         } else {
+          $('#button').removeAttr("disabled");
           jQuery.gritter.add({
             title: '提醒',
             text: data.error,

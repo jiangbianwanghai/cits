@@ -2,6 +2,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 计划模块
+ *
+ * 先创建计划再创建任务，这样可以保证任务是有序的。
  */
 class Plan extends CI_Controller {
 
@@ -44,10 +46,12 @@ class Plan extends CI_Controller {
         if ($curr_plan) {
             $curr_plan = $this->encryption->decrypt($curr_plan);
             if (!($curr_plan != 0 && ctype_digit($curr_plan))) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':计划id异常');
                 show_error('计划id异常', 500, '错误');
             }
         }
 
+        //获取筛选传值
         $data['flow'] = $this->input->get('flow', TRUE);
         $data['type'] = $this->input->get('type', TRUE);
 
@@ -64,7 +68,7 @@ class Plan extends CI_Controller {
         $data['planFolder'] = array();
         $data['curr_plan']['id'] = $data['curr_plan']['sha'] = 0;
         $data['curr_plan']['endtime'] = 0;
-        $api = $this->curl->get($system['api_host'].'/plan/rows_by_projectid?id='.$this->_projectid);
+        $api = $this->curl->get($system['api_host'].'/plan/rows_by_projectid?id='.$this->_projectid.'&access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -87,14 +91,14 @@ class Plan extends CI_Controller {
                 }
             }
         } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取计划API异常.HTTP_CODE['.$api['httpcode'].']');
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
-        
         $data['rows'] = $data['accept_users'] = array();
         $data['total'] = 0;
         if ($data['curr_plan']) {
             //根据计划和项目id读取任务列表
-            $api = $this->curl->get($system['api_host'].'/issue/rows_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
+            $api = $this->curl->get($system['api_host'].'/issue/rows_by_plan?access_token='.$system['access_token'].'&projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
@@ -102,11 +106,12 @@ class Plan extends CI_Controller {
                     $data['total'] = $output['content']['total'];
                 }
             } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务API异常.HTTP_CODE['.$api['httpcode'].']');
                 show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
             }
 
-            //根据计划和项目id读取任务列表
-            $api = $this->curl->get($system['api_host'].'/accept/users_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
+            //根据计划和项目id读取参与计划的人员
+            $api = $this->curl->get($system['api_host'].'/accept/users_by_plan?access_token='.$system['access_token'].'&projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
@@ -116,11 +121,12 @@ class Plan extends CI_Controller {
                     $data['accept_users'] = array_unique($accept_users);
                 }
             } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取参与人员API异常.HTTP_CODE['.$api['httpcode'].']');
                 show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
             }
         }
 
-        $this->load->helper('timediff');
+        $this->load->helper(array('timediff', 'alphaid'));
 
         //刷新在线用户列表（埋点）
         $this->load->model('Model_online', 'online', TRUE);
@@ -129,5 +135,15 @@ class Plan extends CI_Controller {
         $data['online_users'] = $onlineUsers;
 
         $this->load->view('plan', $data);
+    }
+
+    /**
+     * 计算提测成功率
+     *
+     * 算法：
+     */
+    public function rate()
+    {
+
     }
 }
