@@ -25,7 +25,7 @@ class Project extends CI_Controller {
             $data['star'] = unserialize($this->encryption->decrypt($this->input->cookie('cits_star_project'))); //从Cookie中获取
         } else {
             //从个人信息中获取
-            $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID);
+            $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID.'&access_token='.$system['access_token']);
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
@@ -35,16 +35,17 @@ class Project extends CI_Controller {
                     }
                 }
             } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取关注项目API异常.HTTP_CODE['.$api['httpcode'].']');
                 show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
             }
         }
 
         //读取项目团队数据
         $data['rows'] = array();
-        $api_url = $system['api_host'].'/project/rows';
+        $api_url = $system['api_host'].'/project/rows?access_token='.$system['access_token'];
         $data['folder'] = $this->uri->segment(3, 'all');
         if ($data['folder'] == 'my') {
-            $api_url = $system['api_host'].'/project/rows?uid='.UID;
+            $api_url = $system['api_host'].'/project/rows?uid='.UID.'&access_token='.$system['access_token'];
         }
         $api = $this->curl->get($api_url);
         if ($api['httpcode'] == 200) {
@@ -53,6 +54,7 @@ class Project extends CI_Controller {
                 $data['rows'] = $output['content']['data'];
             }
         } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':获取项目信息列表API异常.HTTP_CODE['.$api['httpcode'].']');
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
@@ -71,19 +73,25 @@ class Project extends CI_Controller {
     public function add_ajax()
     {
         //验证输入
-        $this->load->library(array('form_validation', 'curl', 'encryption'));
-        $this->form_validation->set_rules('project_name', '项目团队全称', 'trim|required');
-        $this->form_validation->set_rules('project_description', '描述', 'trim|required');
+        $this->load->library(array('form_validation', 'curl'));
+        $this->form_validation->set_rules('project_name', '项目团队全称', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        $this->form_validation->set_rules('project_description', '描述', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
         if ($this->form_validation->run() == FALSE) {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.validation_errors());
             exit(json_encode(array('status' => false, 'error' => validation_errors())));
         }
 
         //写入数据
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
         $Post_data['project_name'] = $this->input->post('project_name');
         $Post_data['project_description'] = $this->input->post('project_description');
         $Post_data['add_user'] = UID;
-        $this->config->load('extension', TRUE);
-        $system = $this->config->item('system', 'extension');
+        $Post_data['access_token'] = $system['access_token'];
         $api = $this->curl->post($system['api_host'].'/project/write', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
@@ -97,6 +105,7 @@ class Project extends CI_Controller {
                 $Post_data_handle['target_type'] = 1;
                 $Post_data_handle['type'] = 1;
                 $Post_data_handle['content'] = $this->input->post('project_name');
+                $Post_data_handle['access_token'] = $system['access_token'];
                 $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
                 if ($api['httpcode'] == 200) {
                     $output = json_decode($api['output'], true);
@@ -104,13 +113,15 @@ class Project extends CI_Controller {
                         log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
                     }
                 } else {
-                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
                 }
                 exit(json_encode(array('status' => true, 'message' => '创建成功')));
             } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':创建失败');
                 exit(json_encode(array('status' => false, 'error' => '创建失败')));
             }
         } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入项目信息API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
     }
@@ -205,7 +216,7 @@ class Project extends CI_Controller {
         $this->load->library(array('curl', 'encryption'));
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/project/cache');
+        $api = $this->curl->get($system['api_host'].'/project/cache?access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -217,7 +228,7 @@ class Project extends CI_Controller {
                 write_file(APPPATH.'/cache/project.cache.php', serialize($rows));
             }
         } else {
-            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':获取项目团队缓存API异常.HTTP_CODE['.$api['httpcode'].']');
         }
     }
     

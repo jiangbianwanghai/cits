@@ -23,7 +23,7 @@ class User extends CI_Controller {
         $this->load->library(array('curl', 'encryption'));
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/user/cache');
+        $api = $this->curl->get($system['api_host'].'/user/cache?access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -38,5 +38,4 @@ class User extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
     }
-
 }

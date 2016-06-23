@@ -70,13 +70,13 @@ if (file_exists(APPPATH.'/cache/user.cache.php')) {
       </li>
       <li>
         <div class="btn-group">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="logout">
             <img src="<?php echo AVATAR_HOST.'/'.USER_NAME.'.jpg'; ?>" alt="<?php echo REAL_NAME; ?>" />
             <?php echo REAL_NAME; ?>
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu dropdown-menu-usermenu pull-right">
-            <li><a href="/dashboard/logout"><i class="glyphicon glyphicon-log-out"></i> 退出</a></li>
+            <li><a href="/dashboard/logout" id="logout-a"><i class="glyphicon glyphicon-log-out"></i> 退出</a></li>
           </ul>
         </div>
       </li>

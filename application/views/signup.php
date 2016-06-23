@@ -80,6 +80,7 @@
 
     //提交按钮触发
     $("#button").click(function(){
+      $("#button").attr("disabled", true);
       signup();
     });
 
