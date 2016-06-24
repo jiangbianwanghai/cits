@@ -255,6 +255,8 @@ class Issue extends CI_Controller {
         $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $data['level'] = $this->config->item('level', 'extension');
+        $data['env'] = $this->config->item('env', 'extension');
         $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id.'&access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
@@ -266,50 +268,29 @@ class Issue extends CI_Controller {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']');
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
-        $Issue_profile = $output['content'];
+        $data['issue_profile'] = $output['content'];
+        $data['issueid'] = $id;
 
-        $data['PAGE_TITLE'] = $Issue_profile['issue_name'].' - 任务详情';
+        $data['PAGE_TITLE'] = $data['issue_profile']['issue_name'].' - 任务详情';
 
         //读取相关提测记录
+        $data['commit'] = array('total' => 0, 'data' => array());
         $api = $this->curl->get($system['api_host'].'/commit/get_rows_by_issue?id='.$id.'&access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
-                print_r($output);
+                $data['commit'] = $output['content'];
             }
         } else {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提测列表API异常.HTTP_CODE['.$api['httpcode'].']');
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
-        exit();
-
-
-        $data = array(
-            'PAGE_TITLE' => '', //页面标题
-            'row' => array(), //任务详情
-            'test' => array(), //任务相关的提测
-            'total_rows' => 0, //任务相关的提测数量
-            'repos' => array(), //代码库缓存文件
-            'users' => array(), //用户信息缓存文件
-            'shareUsers' => array(), //贡献代码的用户信息
-            'bug' => array(),
-            'bug_total_rows' => 0
-        );
-
-        //获取相关提测记录
-        $this->load->model('Model_test', 'test', TRUE);
-        $rows = $this->test->listByIssueId($id);
-        if ($rows['total']) {
-            $data['test'] = $rows['data'];
-            $data['total_rows'] = $rows['total'];
-        }
-
         //计算提测成功率
         $data['rate'] = '无提测数据用于计算';
         $testIdArr = array();
-        if ($rows['data']) {
-            foreach ($rows['data'] as $key => $value) {
+        if ($data['commit']['total']) {
+            foreach ($data['commit']['data'] as $key => $value) {
                 if (isset($testIdArr[$value['repos_id']])) {
                     $testIdArr[$value['repos_id']] += 1;
                 } else {
@@ -321,17 +302,22 @@ class Issue extends CI_Controller {
         }
 
         //获取相关BUG记录
-        $this->load->model('Model_bug', 'bug', TRUE);
-        $rows = $this->bug->listByIssueId($id);
-        if ($rows['total']) {
-            $data['bug'] = $rows['data'];
-            $data['bug_total_rows'] = $rows['total'];
+        $data['bug'] = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/bug/get_rows_by_issue?id='.$id.'&access_token='.$system['access_token']);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $data['bug'] = $output['content'];
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取bug列表API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
-        
+
         //验证BUG是否都已经处理
         $data['fixedFlag'] = 1;
-        if ($rows['data']) {
-            foreach ($rows['data'] as $key => $value) {
+        if ($data['commit']['total']) {
+            foreach ($data['commit']['data'] as $key => $value) {
                 if ($value['state'] == '0' || $value['state'] == '1') {
                     $data['fixedFlag'] = 0;
                     break;
@@ -339,40 +325,45 @@ class Issue extends CI_Controller {
             }
         }
 
-        //将任务关注人转为数组
-        $data['row']['watch'] = unserialize($data['row']['watch']);
-
         //读取所属计划
-        $data['plan'] = array();
-        if ($data['row']['plan_id']) {
-            $this->load->model('Model_plan', 'plan', TRUE);
-            $data['plan'] = $this->plan->fetchOne($data['row']['plan_id']);
+        $api = $this->curl->get($system['api_host'].'/plan/profile?id='.$data['issue_profile']['plan_id'].'&access_token='.$system['access_token']);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $Plan_profile = $output['content'];
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取计划详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
-        
         //读取受理信息
-        $this->load->model('Model_accept', 'accept', TRUE);
-        $data['acceptUsers'] = $this->accept->users($id);
+        $data['accept_user'] = array();
+        $api = $this->curl->get($system['api_host'].'/accept/get_rows_by_issue?id='.$id.'&access_token='.$system['access_token']);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                foreach ($output['content']['data'] as $key => $value) {
+                    $value['flow'] > 0 && $data['accept_user'][$value['flow']] = $value;
+                }
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取受理人员信息API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        }
         
-        //载入文件缓存
-        if (file_exists('./cache/repos.conf.php')) {
-            require './cache/repos.conf.php';
-            $data['repos'] = $repos;
-        }
-        if (file_exists('./cache/users.conf.php')) {
-            require './cache/users.conf.php';
-            $data['users'] = $users;
-        }
-
         //读取任务相关的评论
-        $this->load->model('Model_issuecomment', 'issuecomment', TRUE);
-        $rows = $this->issuecomment->rows($id);
-        $data['comment'] = $rows['data'];
-
-        //载入配置信息
-        $this->config->load('extension', TRUE);
-        $data['level'] = $this->config->item('level', 'extension');
-        $data['env'] = $this->config->item('env', 'extension');
+        $data['comment'] = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/comment/get_rows_by_id?id='.$id.'&table=issue&access_token='.$system['access_token']);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $data['comment'] = $output['content'];
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取受理人员信息API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        }
 
         $this->load->view('issue_view', $data);
 

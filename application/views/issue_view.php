@@ -1,27 +1,31 @@
-<?php include('common_header.php');?>
+<?php include('common_top.php');?>
+<body class="leftpanel-collapsed">
+<section>
+  <?php include('common_leftpanel.php');?>
+  <div class="mainpanel">
+    <?php include('common_headerbar.php');?>
     <div class="pageheader">
       <h2><i class="fa fa-pencil"></i> 任务管理 <span>任务详情</span></h2>
       <div class="breadcrumb-wrapper">
         <span class="label">你的位置:</span>
         <ol class="breadcrumb">
-          <li><a href="/">我的控制台</a></li>
-          <li><a href="/tice/task_list">任务管理</a></li>
+          <li><a href="/">CITS</a></li>
+          <li><a href="/issue">任务管理</a></li>
           <li class="active">任务详情</li>
         </ol>
       </div>
-    </div>
-    
+    </div><!-- pageheader -->
     <div class="contentpanel">
       <div class="row">
         <div class="col-sm-3 col-lg-2">
           <ul class="nav nav-pills nav-stacked nav-email">
             <li><a href="/issue"><i class="glyphicon glyphicon-folder-close"></i> 任务列表</a></li>
-            <li><a href="/issue/index/to_me"><i class="glyphicon glyphicon-folder-close"></i> 我负责的</a></li>
+            <li><a href="/issue/to_me"><i class="glyphicon glyphicon-folder-close"></i> 我负责的</a></li>
             <li><a href="/issue/from_me"><i class="glyphicon glyphicon-folder-close"></i> 我创建的</a></li>
           </ul>
         </div><!-- col-sm-3 -->
         <div class="col-sm-9 col-lg-10">
-      <?php if ($row['status'] == '-1') { ?>
+      <?php if ($issue_profile['status'] == '-1') { ?>
       <div class="alert alert-warning">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
         <strong>抱歉~</strong> 该任务已被删除.
@@ -31,21 +35,15 @@
         <div class="panel-heading">
           <div class="pull-right">
             <div class="btn-group mr10">
-                <?php if($row['watch'] && in_array($this->input->cookie('username'),$row['watch'])) { ?>
-                <a href="javascript:;" id="unwatch" issueid="<?php echo $row['id']; ?>" class="btn btn-sm btn-white"><i class="glyphicon glyphicon-eye-open"></i> 已关注(<?php echo count($row['watch']); ?>)</a>
-                <a href="javascript:;" id="watch" style="display: none;" issueid="<?php echo $row['id']; ?>" class="btn btn-sm btn-white"><i class="glyphicon glyphicon-eye-open"></i> 关注(<?php echo (count($row['watch']) - 1); ?>)</a>
-                <?php }else{ ?>
-                <a href="javascript:;" id="watch" issueid="<?php echo $row['id']; ?>" class="btn btn-sm btn-white"><i class="glyphicon glyphicon-eye-open"></i> 关注(<?php echo count($row['watch']); ?>)</a>
-                <a href="javascript:;" id="unwatch" style="display: none;" issueid="<?php echo $row['id']; ?>" class="btn btn-sm btn-white"><i class="glyphicon glyphicon-eye-open"></i> 已关注(<?php echo (count($row['watch']) + 1); ?>)</a>
-                <?php } ?>
-                <?php if ($row['status'] == 1) { ?>
-                <a href="/issue/edit/<?php echo $row['id'];?>" class="btn btn-sm btn-white"><i class="fa fa-pencil mr5"></i> 编辑</a>
-                <a href="javascript:;" id="del" reposid="<?php echo $row['id'];?>" class="btn btn-sm btn-white"><i class="fa fa-trash-o mr5"></i> 删除</a>
+                <?php if ($issue_profile['status'] == 1) { ?>
+                <a href="/issue/edit/<?php echo $issueid;?>" class="btn btn-sm btn-white"><i class="fa fa-pencil mr5"></i> 编辑</a>
+                <a href="javascript:;" id="del" reposid="<?php echo $issueid;?>" class="btn btn-sm btn-white"><i class="fa fa-trash-o mr5"></i> 删除</a>
                 <?php } ?>
             </div>
           </div>
-          <h5 class="bug-key-title"><?php if ($row['type'] == 2) {?><i class="fa fa-bug tooltips" data-toggle="tooltip" title="BUG"></i><?php } ?><?php if ($row['type'] == 1) {?><i class="fa fa-magic tooltips" data-toggle="tooltip" title="TASK"></i><?php } ?> ISSUE-<?php echo $row['id'];?></h5>
-          <div class="panel-title"><?php if ($row['level']) { ?><?php echo "<strong style='color:#ff0000;'>".$level[$row['level']]['name']."</strong> ";?><?php } ?><?php if ($row['status'] == '-1') { ?><s><?php echo $row['issue_name'];?></s><?php } else { ?><?php echo $row['issue_name'];?><?php } ?> <?php if ($row['resolve']) { ?> <span class="label label-success">已解决</span><?php }?> <?php if ($row['status'] == 0) {?> <span class="label label-default">已关闭</span><?php }?></div>
+          
+          <div class="panel-title"><?php if ($issue_profile['type'] == 2) {?><i class="fa fa-bug tooltips" data-toggle="tooltip" title="BUG"></i><?php } ?><?php if ($issue_profile['type'] == 1) {?><i class="fa fa-magic tooltips" data-toggle="tooltip" title="TASK"></i><?php } ?> <?php if ($issue_profile['level']) { ?><?php echo "<strong style='color:#ff0000;'>".$level[$issue_profile['level']]['name']."</strong> ";?><?php } ?> <?php if ($issue_profile['status'] == '-1') { ?><s><?php echo $issue_profile['issue_name'];?></s><?php } else { ?><?php echo $issue_profile['issue_name'];?><?php } ?> <?php if ($issue_profile['resolve']) { ?> <span class="label label-success">已解决</span><?php }?> <?php if ($issue_profile['status'] == 0) {?> <span class="label label-default">已关闭</span><?php }?></div>
+          <small>创建人：<?php echo $users[$issue_profile['add_user']]['realname'];?> 创建时间：<?php echo date("Y-m-d H:i:s", $issue_profile['add_time']); ?></small>
         </div>
         <div class="panel-body">
           <h5 class="subtitle subtitle-lined">进度</h5>
@@ -54,64 +52,64 @@
             <tbody>
               <tr>
                 <td>
-                  <?php if ($acceptUsers && isset($acceptUsers['1'])) { ?>
-                  <span class="face"><img alt="" src="/static/avatar/<?php echo $users[$acceptUsers['1']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $acceptUsers['1']['accept_user'];?>" target="_blank"><?php echo $users[$acceptUsers['1']['accept_user']]['realname'];?></a>
+                  <?php if ($accept_user && isset($accept_user['1'])) { ?>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['1']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['1']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['1']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
-                <td colspan="<?php if ($bug_total_rows) {echo 4;}else{echo 2;}?>">
-                  <?php if ($acceptUsers && isset($acceptUsers['2'])) { ?>
-                  <span class="face"><img alt="" src="/static/avatar/<?php echo $users[$acceptUsers['2']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $acceptUsers['1']['accept_user'];?>" target="_blank"><?php echo $users[$acceptUsers['2']['accept_user']]['realname'];?></a>
+                <td colspan="<?php if ($bug['total']) {echo 4;}else{echo 2;}?>">
+                  <?php if ($accept_user && isset($accept_user['2'])) { ?>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['2']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['1']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['2']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
                 <td colspan="2">
-                  <?php if ($acceptUsers && isset($acceptUsers['3'])) { ?>
-                  <span class="face"><img alt="" src="/static/avatar/<?php echo $users[$acceptUsers['3']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $acceptUsers['3']['accept_user'];?>" target="_blank"><?php echo $users[$acceptUsers['3']['accept_user']]['realname'];?></a>
+                  <?php if ($accept_user && isset($accept_user['3'])) { ?>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['3']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['3']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['3']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
                 <td>
-                  <?php if ($acceptUsers && isset($acceptUsers['4'])) { ?>
-                  <span class="face"><img alt="" src="/static/avatar/<?php echo $users[$acceptUsers['4']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $acceptUsers['4']['accept_user'];?>" target="_blank"><?php echo $users[$acceptUsers['4']['accept_user']]['realname'];?></a>
+                  <?php if ($accept_user && isset($accept_user['4'])) { ?>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['4']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['4']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['4']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
               </tr>
               <tr>
                 <td class="blue" width="150px">新建</td>
                 <!-- #开发-我要开发# -->
-                <?php if ($row['workflow'] >= 1) {?>
+                <?php if ($issue_profile['workflow'] >= 1) {?>
                 <td class="blue">开发中</td>
-                <?php } elseif ($row['accept_user'] == $this->input->cookie('uids')) {?>
-                <td style="text-align:center;" id="td-dev"><a href="javascript:;" ids="<?php echo $row['id']; ?>" class="label label-danger dev">我要开发</a></td>
+                <?php } elseif ($issue_profile['accept_user'] == $this->input->cookie('uids')) {?>
+                <td style="text-align:center;" id="td-dev"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger dev">我要开发</a></td>
                 <?php } else { ?>
                 <td style="text-align:center;">开发中</td>
                 <?php }?>
                 <!-- #开发-开发完毕# -->
-                <?php if ($row['workflow'] >= 2) {?>
+                <?php if ($issue_profile['workflow'] >= 2) {?>
                 <td class="blue">开发完毕</td>
                 <?php } else {?>
-                <?php if ($row['workflow']  == 1 && $row['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php if ($issue_profile['workflow']  == 1 && $issue_profile['accept_user'] == $this->input->cookie('uids')) {?>
                 <td style="text-align:center;" width="200px" id="td-over">
-                  <a href="/test/add/<?php echo $row['id'];?>" class="label label-danger" target="_blank">提交代码</a> 
-                  <a href="javascript:;" ids="<?php echo $row['id']; ?>" class="label label-primary over">开发完毕</a>
+                  <a href="/test/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">提交代码</a> 
+                  <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary over">开发完毕</a>
                 </td>
                 <?php } else {?>
                 <td style="text-align:center;">开发完毕</td>
                 <?php } ?>
                 <?php } ?>
                 <!-- #开发-修复中# -->
-                <?php if ($bug_total_rows) {?>
-                <?php if ($row['workflow'] >= 3) {?>
+                <?php if ($bug['total']) {?>
+                <?php if ($issue_profile['workflow'] >= 3) {?>
                 <td class="blue">修复中</td>
                 <?php } else {?>
                 <td style="text-align:center;">修复中</td>
                 <?php } ?>
 
-                <?php if ($row['workflow'] >= 4) {?>
+                <?php if ($issue_profile['workflow'] >= 4) {?>
                 <td class="blue">修复完毕</td>
                 <?php } else {?>
-                <?php if ($row['workflow'] == 3 && $acceptUsers && isset($acceptUsers['2']) && $acceptUsers['2']['accept_user'] == $this->input->cookie('uids')) { ?>
+                <?php if ($issue_profile['workflow'] == 3 && $accept_user && isset($accept_user['2']) && $accept_user['2']['accept_user'] == $this->input->cookie('uids')) { ?>
                 <td style="text-align:center;" width="200px" id="td-fix">
-                  <a href="/test/add/<?php echo $row['id'];?>" class="label label-danger" target="_blank">提交代码</a> 
-                  <a href="javascript:;" ids="<?php echo $row['id']; ?>" class="label label-primary fix">修复完毕</a>
+                  <a href="/test/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">提交代码</a> 
+                  <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary fix">修复完毕</a>
                 </td>
                 <?php }else { ?>
                 <td style="text-align:center;">修复完毕</td>
@@ -120,12 +118,12 @@
                 <?php } ?>
 
                 <!-- #测试-测试中# -->
-                <?php if ($row['workflow'] >= 5) {?>
+                <?php if ($issue_profile['workflow'] >= 5) {?>
                 <td class="blue">测试中</td>
                 <?php } else {?>
-                <?php if (($row['workflow'] == 2 || $row['workflow'] == 4)&& $acceptUsers && isset($acceptUsers['3']) && $acceptUsers['3']['accept_user'] == $this->input->cookie('uids')) {?>
-                <td style="text-align:center;" id="td-test"><a href="javascript:;" ids="<?php echo $row['id']; ?>" class="label label-danger test">我要测试</a></td>
-                <?php } elseif ($row['workflow'] == 2 && $acceptUsers && !isset($acceptUsers['3']) && $acceptUsers['2']['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php if (($issue_profile['workflow'] == 2 || $issue_profile['workflow'] == 4)&& $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == $this->input->cookie('uids')) {?>
+                <td style="text-align:center;" id="td-test"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger test">我要测试</a></td>
+                <?php } elseif ($issue_profile['workflow'] == 2 && $accept_user && !isset($accept_user['3']) && $accept_user['2']['accept_user'] == $this->input->cookie('uids')) {?>
                 <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
                 <?php } else {?>
                 <td style="text-align:center;">测试中</td>
@@ -133,13 +131,13 @@
                 <?php } ?>
 
                 <!-- #测试-测试通过# -->
-                <?php if ($row['workflow'] >= 6) { ?>
+                <?php if ($issue_profile['workflow'] >= 6) { ?>
                   <td class="blue">测试通过</td>
                 <?php } else { ?>
-                  <?php if (($row['workflow'] >=3 && $row['workflow'] <= 5) && $acceptUsers && isset($acceptUsers['3']) && $acceptUsers['3']['accept_user'] == $this->input->cookie('uids')) {?>
+                  <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == $this->input->cookie('uids')) {?>
                   <td style="text-align:center;" width="200px" id="td-wait">
-                    <a href="/bug/add/<?php echo $row['id'];?>" class="label label-danger" target="_blank">反馈BUG</a> 
-                    <a href="javascript:;" ids="<?php echo $row['id']; ?>" class="label label-primary waits">测试通过</a>
+                    <a href="/bug/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">反馈BUG</a> 
+                    <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary waits">测试通过</a>
                   </td>
                   <?php } else {?>
                   <td style="text-align:center;">测试通过</td>
@@ -147,12 +145,12 @@
                 <?php } ?>
 
                 <!-- #上线# -->
-                <?php if ($row['workflow'] == 7) { ?>
+                <?php if ($issue_profile['workflow'] == 7) { ?>
                 <td class="blue">已上线</td>
                 <?php } else { ?>
-                <?php if ($row['workflow'] == 6 && $acceptUsers && isset($acceptUsers['4']) && $acceptUsers['4']['accept_user'] == $this->input->cookie('uids')) {?>
-                <td style="text-align:center;" id="td-online"><a href="javascript:;" ids="<?php echo $row['id']; ?>" class="label label-danger onlines">通知上线</a></td>
-                <?php } elseif ($row['workflow'] == 6 && $acceptUsers && !isset($acceptUsers['4']) && $acceptUsers['3']['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php if ($issue_profile['workflow'] == 6 && $accept_user && isset($accept_user['4']) && $accept_user['4']['accept_user'] == $this->input->cookie('uids')) {?>
+                <td style="text-align:center;" id="td-online"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger onlines">通知上线</a></td>
+                <?php } elseif ($issue_profile['workflow'] == 6 && $accept_user && !isset($accept_user['4']) && $accept_user['3']['accept_user'] == $this->input->cookie('uids')) {?>
                 <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
                 <?php } else {?>
                 <td style="text-align:center;">上线</td>
@@ -168,10 +166,10 @@
           <p><?php echo $row['issue_summary'];?></p>
           <br />
           <div align="right">
-          <?php if (($row['workflow'] == 1 || $row['workflow'] == 3) && isset($acceptUsers['2']) && $acceptUsers['2']['accept_user'] != $this->input->cookie('uids')) { ?>
+          <?php if (($row['workflow'] == 1 || $row['workflow'] == 3) && isset($accept_user['2']) && $accept_user['2']['accept_user'] != $this->input->cookie('uids')) { ?>
           <a href="/test/add/<?php echo $row['id'];?>" class="label label-danger">其他人可以点击此处提交代码</a>
           <?php } ?>
-          <?php if (($row['workflow'] >=3 && $row['workflow'] <= 5) && isset($acceptUsers['3']) && $acceptUsers['3']['accept_user'] != $this->input->cookie('uids')) { ?>
+          <?php if (($row['workflow'] >=3 && $row['workflow'] <= 5) && isset($accept_user['3']) && $accept_user['3']['accept_user'] != $this->input->cookie('uids')) { ?>
            <a href="/bug/add/<?php echo $row['id'];?>" class="label label-danger">其他人可以点击此处反馈BUG</a>
           <?php } ?>
           </div>

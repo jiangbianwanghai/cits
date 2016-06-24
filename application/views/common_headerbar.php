@@ -1,14 +1,14 @@
 <?php
 //载入项目缓存文件
 $project = array();
-if (file_exists(APPPATH.'/cache/project.cache.php')) {
-  $project = file_get_contents(APPPATH.'/cache/project.cache.php');
+if (file_exists(APPPATH.'cache/project.cache.php')) {
+  $project = file_get_contents(APPPATH.'cache/project.cache.php');
   $project = unserialize($project);
 }
 //载入用户缓存文件
 $users = array();
-if (file_exists(APPPATH.'/cache/user.cache.php')) {
-  $users = file_get_contents(APPPATH.'/cache/user.cache.php');
+if (file_exists(APPPATH.'cache/user.cache.php')) {
+  $users = file_get_contents(APPPATH.'cache/user.cache.php');
   $users = unserialize($users);
 }
 ?>

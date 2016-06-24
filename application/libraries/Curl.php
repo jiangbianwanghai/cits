@@ -40,6 +40,7 @@ class Curl
         $data['httpcode'] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $data['total_time'] = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
         curl_close($ch);
+        $this->log($url, $data['total_time'], $data['httpcode']);
         return $data;
     }
 
@@ -67,6 +68,7 @@ class Curl
         $data['httpcode'] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $data['total_time'] = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
         curl_close($ch);
+        $this->log($url, $data['total_time'], $data['httpcode']);
         return $data;
     }
 
@@ -118,5 +120,11 @@ class Curl
             'Accept-Charset:UTF-8,utf-8;q=0.7,*;q=0.3'
         );
         return $array;
+    }
+
+    protected function log($url, $time, $code)
+    {
+        $content = 'INFO: '.$code.' '.$time.' '.$url.' '.PHP_EOL;
+        file_put_contents(APPPATH.'logs/curl-log-'.date('Y-m-d', time()).'.log', $content, FILE_APPEND);
     }
 }
