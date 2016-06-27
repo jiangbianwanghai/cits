@@ -125,6 +125,6 @@ class Curl
     protected function log($url, $time, $code)
     {
         $content = 'INFO: '.$code.' '.$time.' '.$url.' '.PHP_EOL;
-        file_put_contents(APPPATH.'logs/curl-log-'.date('Y-m-d', time()).'.log', $content, FILE_APPEND);
+        file_put_contents(APPPATH.'logs/log-curl-'.date('Y-m-d', time()).'.log', $content, FILE_APPEND);
     }
 }

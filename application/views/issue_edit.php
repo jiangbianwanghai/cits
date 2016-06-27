@@ -5,13 +5,13 @@
   <div class="mainpanel">
     <?php include('common_headerbar.php');?>
     <div class="pageheader">
-      <h2><i class="fa fa-tasks"></i> 任务管理 <span>创建任务</span></h2>
+      <h2><i class="fa fa-tasks"></i> 任务管理 <span>编辑任务</span></h2>
       <div class="breadcrumb-wrapper">
         <span class="label">你的位置:</span>
         <ol class="breadcrumb">
           <li><a href="/">CITS</a></li>
           <li><a href="/issue">任务管理</a></li>
-          <li class="active">创建任务</li>
+          <li class="active">编辑任务</li>
         </ol>
       </div>
     </div><!-- pageheader -->
@@ -26,67 +26,41 @@
           </ul>
         </div><!-- col-sm-3 -->
         <div class="col-sm-9 col-lg-10">
-          <form method="POST" id="basicForm" action="/issue/add_ajax" class="form-horizontal">
+          <form method="POST" id="basicForm" action="/issue/edit_ajax" class="form-horizontal">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h4 class="panel-title">新增任务</h4>
+              <h4 class="panel-title">编辑任务</h4>
               <p>每个任务都应该包含在计划中</p>
             </div>
               <div class="panel-body">
                 <div class="col-sm-8 col-lg-9">
                   <div class="form-group">
                     <label class="control-label">任务全称 <span class="asterisk">*</span></label>
-                    <input type="text" id="issue_name" name="issue_name" class="form-control" placeholder="请输入任务名称" required />
+                    <input type="text" id="issue_name" name="issue_name" value="<?php echo $profile['issue_name'];?>" class="form-control" placeholder="请输入任务名称" required />
                   </div>
                   <div class="form-group">
                     <label class="control-label">说明</label>
-                    <textarea id="issue_summary" name="issue_summary" rows="3" class="form-control" placeholder="请输入任务描述"></textarea>
+                    <textarea id="issue_summary" name="issue_summary" rows="3" class="form-control" placeholder="请输入任务描述"><?php echo $profile['issue_summary'];?></textarea>
                   </div>
                   <div class="form-group">
                     <label class="control-label">相关链接</label>
-                    <textarea id="issue_url" name="issue_url" rows="3" class="form-control" placeholder="每行一个链接，可以添加多个"></textarea>
+                    <textarea id="issue_url" name="issue_url" rows="3" class="form-control" placeholder="每行一个链接，可以添加多个"><?php
+                      if ($profile['url']) {
+                        foreach ($profile['url'] as $key => $value) {
+                          echo $value.PHP_EOL;
+                        }
+                      }
+                      ?></textarea>
                   </div>
                 </div>
                 <div class="col-sm-4 col-lg-3" style="padding-left:50px;">
-                  <?php if (!$planid && $planRows) { ?>
-                  <div class="form-group">
-                    <label class="control-label">所属计划 <span class="asterisk">*</span></label>
-                    <div>
-                      <select id="planid" name="planid" class="select3" data-placeholder="请选择所属计划" required>
-                        <option value=""></option>
-                        <?php
-                        foreach ($planRows as $key => $value) {
-                          echo '<option value="'.$value['id'].'">'.$value['plan_name'].'</option>';
-                        }
-                        ?>
-                      </select>
-                    </div>
-                  </div>
-                  <?php } ?>
-                  <div class="form-group">
-                    <label class="control-label">指派给谁 <span class="asterisk">*</span></label>
-                    <div>
-                      <select id="accept_user" name="accept_user" class="select2" data-placeholder="请选择受理人" required>
-                        <option value=""></option>
-                        <?php
-                        if (isset($users) && $users) {
-                          foreach ($users as $value) {
-                        ?>
-                        <option value="<?php echo $value['uid'];?>"><?php echo $value['realname'];?></option>
-                        <?php
-                          }
-                        }
-                        ?>
-                      </select>
-                    </div>
-                  </div>
                   <div class="form-group">
                     <label class="control-label">任务类型 <span class="asterisk">*</span></label>
                     <div>
                       <select id="type" name="type" class="select3" data-placeholder="请选择任务类型" required>
                         <option value=""></option>
-                        <option value="1">TASK</option>
-                        <option value="2">BUG</option>
+                        <option value="2"<?php if ($profile['type'] == 2) { echo " selected=\"selected\"";}?>>BUG</option>
+                        <option value="1"<?php if ($profile['type'] == 1) { echo " selected=\"selected\"";}?>>TASK</option>
                       </select>
                     </div>
                   </div>
@@ -97,7 +71,9 @@
                         <option value=""></option>
                         <?php
                         foreach ($level as $key => $value) {
-                          echo '<option value="'.$key.'">'.$value['name'].' - '.$value['task'].'</option>';
+                          $selected = '';
+                          $key == $profile['level'] && $selected = " selected=\"selected\"";
+                          echo '<option value="'.$key.'"'.$selected.'>'.$value['name'].' - '.$value['task'].'</option>';
                         }
                         ?>
                       </select>
@@ -105,9 +81,7 @@
                   </div>
                 </div>
               </div><!-- panel-body -->
-              <?php if ($planid) {?>
-              <input type="hidden" name="planid" value="<?php echo $planid;?>" />
-              <?php } ?>
+              <input type="hidden" name="issueid" value="<?php echo $issueid;?>" />
               <div class="panel-footer">
                 <div class="row">
                   <button class="btn btn-primary" id="btnSubmit">提交</button>
@@ -168,7 +142,7 @@ jQuery(document).ready(function(){
   $("#basicForm").submit(function(){
     $(this).ajaxSubmit({
       type:"post",
-      url: "/issue/add_ajax",
+      url: "/issue/edit_ajax",
       dataType: "JSON",
       beforeSubmit:validForm,
       success:callBack
@@ -205,7 +179,7 @@ jQuery(document).ready(function(){
     textarea : $('#issue_summary'),
     placeholder : '这里输入内容...',
     toolbar : toolbar,  //工具栏
-    defaultImage : '<?php echo STATIC_HOST.'/'; ?>static/simditor-2.3.6/images/image.png', //编辑器插入图片时使用的默认图片
+    defaultImage : '<?php echo STATIC_HOST.'/'; ?>simditor-2.3.6/images/image.png', //编辑器插入图片时使用的默认图片
     pasteImage: true,
     upload: {
         url: '/dashboard/upload',

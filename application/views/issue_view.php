@@ -4,6 +4,13 @@
   <?php include('common_leftpanel.php');?>
   <div class="mainpanel">
     <?php include('common_headerbar.php');?>
+    <?php
+    //载入用户缓存文件
+    $repos = array();
+    if (file_exists(APPPATH.'cache/repos.cache.php')) {
+      $repos = unserialize(file_get_contents(APPPATH.'cache/repos.cache.php'));
+    }
+    ?>
     <div class="pageheader">
       <h2><i class="fa fa-pencil"></i> 任务管理 <span>任务详情</span></h2>
       <div class="breadcrumb-wrapper">
@@ -58,7 +65,7 @@
                 </td>
                 <td colspan="<?php if ($bug['total']) {echo 4;}else{echo 2;}?>">
                   <?php if ($accept_user && isset($accept_user['2'])) { ?>
-                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['2']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['1']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['2']['accept_user']]['realname'];?></a>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['2']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['2']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['2']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
                 <td colspan="2">
@@ -163,30 +170,30 @@
           </div><!-- table-responsive -->
           <br />
           <h5 class="subtitle subtitle-lined">描述</h5>
-          <p><?php echo $row['issue_summary'];?></p>
+          <p><?php echo $issue_profile['issue_summary'];?></p>
           <br />
           <div align="right">
-          <?php if (($row['workflow'] == 1 || $row['workflow'] == 3) && isset($accept_user['2']) && $accept_user['2']['accept_user'] != $this->input->cookie('uids')) { ?>
-          <a href="/test/add/<?php echo $row['id'];?>" class="label label-danger">其他人可以点击此处提交代码</a>
+          <?php if (($issue_profile['workflow'] == 1 || $issue_profile['workflow'] == 3) && isset($accept_user['2']) && $accept_user['2']['accept_user'] != $this->input->cookie('uids')) { ?>
+          <a href="/test/add/<?php echo $issueid;?>" class="label label-danger">其他人可以点击此处提交代码</a>
           <?php } ?>
-          <?php if (($row['workflow'] >=3 && $row['workflow'] <= 5) && isset($accept_user['3']) && $accept_user['3']['accept_user'] != $this->input->cookie('uids')) { ?>
-           <a href="/bug/add/<?php echo $row['id'];?>" class="label label-danger">其他人可以点击此处反馈BUG</a>
+          <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && isset($accept_user['3']) && $accept_user['3']['accept_user'] != $this->input->cookie('uids')) { ?>
+           <a href="/bug/add/<?php echo $issueid;?>" class="label label-danger">其他人可以点击此处反馈BUG</a>
           <?php } ?>
           </div>
-          <h5 class="subtitle subtitle-lined">开发信息 <span class="badge badge-info"><?php echo $total_rows;?></span></h5>
+          <h5 class="subtitle subtitle-lined">开发信息 <span class="badge badge-info"><?php echo $commit['total'];?></span></h5>
           <div class="table-responsive mb30">
             <table class="table table-email">
               <tbody>
                 <?php
-                  if ($test) {
-                    foreach ($test as $value) {
+                  if ($commit['data']) {
+                    foreach ($commit['data'] as $value) {
                       if (!isset($timeGroup[$value['repos_id']])) {
                         $timeGroup[$value['repos_id']] = 1;
                         echo '<tr><td colspan="8"><span class="fa fa-cloud-upload"></span> '.$repos[$value['repos_id']]['repos_name'].'</td></tr>';
                       }
                 ?>
                 <tr id="tr-<?php echo $value['id'];?>" class="unread">
-                  <td><a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left"><div class="face"><img alt="" src="/static/avatar/<?php echo $users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="添加人：<?php echo $users[$value['add_user']]['realname'];?>"></div></a></td>
+                  <td><a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left"><div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="添加人：<?php echo $users[$value['add_user']]['realname'];?>"></div></a></td>
                   <td></td>
                   <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a>'; }?> @<?php echo $value['test_flag'];?><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?>
                   </td>
@@ -265,10 +272,10 @@
                     <?php }?>
                   </td>
                   <td width="150">
-                    <?php if ($row['status'] == 1) {?>
+                    <?php if ($issue_profile['status'] == 1) {?>
                     <?php if ($value['tice'] < 1) {?>
-                    <a class="btn btn-white btn-xs" href="/test/edit/<?php echo $row['id'];?>/<?php echo $value['id'];?>"><i class="fa fa-pencil"></i> 编辑</a>
-                    <a class="btn btn-white btn-xs delete-row" href="javascript:;" issueid="<?php echo $row['id'];?>" testid="<?php echo $value['id'];?>"><i class="fa fa-trash-o"></i> 删除</a>
+                    <a class="btn btn-white btn-xs" href="/test/edit/<?php echo $issueid;?>/<?php echo $value['id'];?>"><i class="fa fa-pencil"></i> 编辑</a>
+                    <a class="btn btn-white btn-xs delete-row" href="javascript:;" issueid="<?php echo $issueid;?>" testid="<?php echo $value['id'];?>"><i class="fa fa-trash-o"></i> 删除</a>
                     <?php }?>
                     <?php }?> 
                   </td>
@@ -297,30 +304,30 @@
             <tbody>
               <tr>
                 <td width="100px">创建人</td>
-                <td><?php echo $row['add_user'] ? '<a href="/conf/profile/'.$row['add_user'].'">'.$users[$row['add_user']]['realname'].'</a>' : '-';?></td>
+                <td><?php echo $issue_profile['add_user'] ? '<a href="/conf/profile/'.$issue_profile['add_user'].'">'.$users[$issue_profile['add_user']]['realname'].'</a>' : '-';?></td>
                 <td width="100px">创建时间</td>
-                <td><?php echo $row['add_time'] ? date("Y/m/d H:i:s", $row['add_time']) : '-';?></td>
+                <td><?php echo $issue_profile['add_time'] ? date("Y/m/d H:i:s", $issue_profile['add_time']) : '-';?></td>
               </tr>
               <tr>
                 <td width="100px">当前受理人</td>
-                <td><a href="javascript:;" id="country" data-type="select2" data-value="<?php echo $row['accept_user'];?>" data-title="更改受理人"></a></td>
+                <td><a href="javascript:;" id="country" data-type="select2" data-value="<?php echo $issue_profile['accept_user'];?>" data-title="更改受理人"></a></td>
                 <td width="100px">受理时间</td>
-                <td><?php echo $row['last_time'] ? date("Y/m/d H:i:s", $row['last_time']) : '-';?></td>
+                <td><?php echo $issue_profile['last_time'] ? date("Y/m/d H:i:s", $issue_profile['last_time']) : '-';?></td>
               </tr>
               <tr>
                 <td width="100px">最后修改人</td>
-                <td><?php echo $row['last_user'] ? '<a href="/conf/profile/'.$row['last_user'].'">'.$users[$row['last_user']]['realname'].'</a>' : '-';?></td>
+                <td><?php echo $issue_profile['last_user'] ? '<a href="/conf/profile/'.$issue_profile['last_user'].'">'.$users[$issue_profile['last_user']]['realname'].'</a>' : '-';?></td>
                 <td width="120px">最后修改时间</td>
-                <td><?php echo $row['last_time'] ? date("Y/m/d H:i:s", $row['last_time']) : '-';?></td>
+                <td><?php echo $issue_profile['last_time'] ? date("Y/m/d H:i:s", $issue_profile['last_time']) : '-';?></td>
               </tr>
               <tr>
                 <td width="100px">所属计划</td>
-                <td><?php if ($plan) { echo '<a href="/plan?planId='.$plan['id'].'" target="_blank">'.$plan['plan_name'].'</a>'; }?></td>
+                <td><?php if ($plan_profile) { echo '<a href="/plan?planId='.urlencode($this->encryption->encrypt($plan_profile['id'])).'" target="_blank">'.$plan_profile['plan_name'].'</a>'; }?></td>
                 <td width="120px">贡献者</td>
                 <td>
                   <?php
-                  if ($acceptUsers) {
-                    foreach ($acceptUsers as $key => $value) {
+                  if ($accept_user) {
+                    foreach ($accept_user as $key => $value) {
                       $acceptUsersDup[] = $value['accept_user'];
                     }
                     $acceptUsersDup = array_unique($acceptUsersDup);
@@ -335,14 +342,14 @@
                 <td width="100px">相关链接</td>
                 <td>
                   <?php
-                  if ($row['url']) {
-                    if (strrpos($row['url'], '{')) {
-                     $url = unserialize($row['url']);
+                  if ($issue_profile['url']) {
+                    if (strrpos($issue_profile['url'], '{')) {
+                     $url = unserialize($issue_profile['url']);
                       foreach ($url as $key => $value) {
                         echo "<a href=\"".$value."\" target=\"_blank\">链接".($key+1)."</a> ";
                       }
                     } else {
-                      echo "<a href=\"".$row['url']."\" target=\"_blank\">链接</a>";
+                      echo "<a href=\"".$issue_profile['url']."\" target=\"_blank\">链接</a>";
                     }
                   }
                   ?>
@@ -353,14 +360,14 @@
             </tbody>
           </table>
           </div><!-- table-responsive -->
-          <?php if ($bug_total_rows) {?>
-          <h5 class="subtitle subtitle-lined">发现的BUG  <span class="badge badge-info"><?php echo $bug_total_rows;?></span></h5>
+          <?php if ($bug['total']) {?>
+          <h5 class="subtitle subtitle-lined">发现的BUG  <span class="badge badge-info"><?php echo $bug['total'];?></span></h5>
           <div class="table-responsive">
             <table class="table table-striped">
               <tbody>
                 <?php
-                  if ($bug) {
-                    foreach ($bug as $value) {
+                  if ($bug['data']) {
+                    foreach ($bug['data'] as $value) {
                 ?>
                   <tr>
                     <td width="50px">
@@ -424,8 +431,8 @@
       <div class="panel">
         <div class="panel-body">
           <?php
-            if ($comment) {
-              foreach ($comment as $value) {
+            if ($comment['data']) {
+              foreach ($comment['data'] as $value) {
           ?>
           <div class="media" id="comment-<?php echo $value['id'];?>">
             <div class="pull-left">
@@ -434,7 +441,7 @@
             <div class="media-body">
               <span class="media-meta pull-right"><?php echo friendlydate($value['add_time']);?><?php if ($value['add_user'] == $this->input->cookie('uids')) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
               <h6 class="text-muted"><?php echo $users[$value['add_user']]['realname'];?></h6>
-              <small class="text-muted"><?php if ($value['add_user'] == $row['accept_user']) { echo '当前受理人'; } else { echo '路人甲'; }?></small>
+              <small class="text-muted"><?php if ($value['add_user'] == $issue_profile['accept_user']) { echo '当前受理人'; } else { echo '路人甲'; }?></small>
               <p><?php echo html_entity_decode($value['content']);?></p>
             </div>
           </div>
@@ -445,14 +452,14 @@
           <div id="box"></div>
           <div class="media">
             <div class="pull-left">
-              <div class="face"><img alt="" src="/static/avatar/<?php echo $users[$this->input->cookie('uids')]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$this->input->cookie('uids')]['realname'];?>"></div>
+              <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[UID]['username']?>.jpg" align="absmiddle" title="<?php echo $users[UID]['realname'];?>"></div>
             </div>
             <div class="media-body">
               <input type="text" class="form-control" id="post-commit" placeholder="我要发表评论">
               <div id="simditor" style="display:none;">
                 <textarea id="content" name="content"></textarea>
                 <div class="mb10"></div>
-                <input type="hidden" value="<?php echo $row['id'];?>" id="issue_id" name="issue_id">
+                <input type="hidden" value="<?php echo $issueid;?>" id="issue_id" name="issue_id">
                 <button class="btn btn-primary" id="btnSubmit">提交</button>
               </div>
             </div>
@@ -460,7 +467,8 @@
         </div><!-- row -->  
       </div><!-- panel-body -->
     </div><!-- panel -->
-  </div>  
+  </div>
+  <p class="text-right"><small>页面执行时间 <em>{elapsed_time}</em> 秒 使用内存 {memory_usage}</small></p>  
 </div><!-- contentpanel -->
 </div><!-- mainpanel -->
   
@@ -478,28 +486,20 @@
   </div>
 </div>
 
-<script src="/static/js/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="/static/simditor-2.3.6/scripts/module.js"></script>
-<script type="text/javascript" src="/static/simditor-2.3.6/scripts/uploader.js"></script>
-<script type="text/javascript" src="/static/simditor-2.3.6/scripts/hotkeys.js"></script>
-<script type="text/javascript" src="/static/simditor-2.3.6/scripts/simditor.js"></script>
-<script src="/static/js/jquery-migrate-1.2.1.min.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
-<script src="/static/js/modernizr.min.js"></script>
-<script src="/static/js/jquery.sparkline.min.js"></script>
-<script src="/static/js/toggles.min.js"></script>
-<script src="/static/js/jquery.cookies.js"></script>
-
-<script src="/static/js/jquery.datatables.min.js"></script>
-<script src="/static/js/simple-pinyin.js"></script>
-<script src="/static/js/select2.min.js"></script>
-<script src="/static/js/jquery.gritter.min.js"></script>
-<script src="/static/js/bootstrap-editable.min.js"></script>
-<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
-<script src="/static/js/moment.js"></script>
-<script src="/static/js/jquery.countdown.js"></script>
-
-<script src="/static/js/custom.js"></script>
+<?php include('common_js.php');?>
+<script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/module.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/uploader.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/hotkeys.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/simditor.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/jquery.datatables.min.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/simple-pinyin.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/select2.min.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/bootstrap-editable.min.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/bootstrap-datetimepicker.min.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/moment.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/jquery.countdown.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>
 <script>
   function changeIssueStatus(obj1,obj2,obj3) {
     $(obj1).click(function(){
@@ -584,7 +584,7 @@
       $('#simditor').show();
     });
 
-    $('#deadline').countdown('<?php echo date("Y-m-d H:i", $row['deadline']);?>', function(event) {
+    $('#deadline').countdown('<?php echo date("Y-m-d H:i", $issue_profile['deadline']);?>', function(event) {
       $(this).html(event.strftime('%D days %H:%M:%S'));
     });
 
@@ -617,7 +617,7 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = "/issue/view/<?php echo $row['id'];?>";
+                location.href = "/issue/view/<?php echo $issueid;?>";
               }, 1000);
             } else {
               jQuery.gritter.add({
@@ -931,7 +931,7 @@
         ajaxOptions: {
           type: 'GET'
         },
-        url: '/issue/change_accept/<?php echo $row["id"];?>',
+        url: '/issue/change_accept/<?php echo $issueid;?>',
         send: 'always',
         select2: {
             width: 150,
@@ -948,7 +948,7 @@
         ajaxOptions: {
           type: 'GET'
         },
-        url: '/issue/change_accept/<?php echo $row["id"];?>',
+        url: '/issue/change_accept/<?php echo $issueid;?>',
         send: 'always',
         select2: {
             width: 150,
@@ -1112,9 +1112,9 @@ $(function(){
     $(obj).attr('curr', env);
     var merge = $(this).attr('merge');
     if (merge == 1) {
-      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy br="+br+" rev="+rev+" issue=<?php echo $row['id']; ?>";
+      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy br="+br+" rev="+rev+" issue=<?php echo $issueid; ?>";
     } else if (repos == 'gc.style-conf') {
-      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy rev="+rev+" issue=<?php echo $row['id']; ?>";
+      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy rev="+rev+" issue=<?php echo $issueid; ?>";
     } else {
       var cap = '此代码库不适合使用capistrano部署，请使用CAP部署';
     }
