@@ -19,7 +19,7 @@ class Signup extends CI_Controller {
     public function add() {
 
         //验证输入
-        $this->load->library(array('form_validation', 'curl'));
+        $this->load->library('form_validation');
         $this->form_validation->set_rules('email', '邮箱', 'trim|required|valid_email|min_length[5]|max_length[50]',
             array(
                 'required' => '%s 不能为空',
@@ -59,6 +59,7 @@ class Signup extends CI_Controller {
 
         //唯一性验证
         //邮箱
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $api = $this->curl->get($system['api_host'].'/user/check_email?email='.$this->input->post('email').'&access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
@@ -119,9 +120,9 @@ class Signup extends CI_Controller {
      */
     public function refresh()
     {
-        $this->load->library(array('curl'));
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $api = $this->curl->get($system['api_host'].'/user/cache?access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);

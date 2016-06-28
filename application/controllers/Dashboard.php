@@ -62,12 +62,15 @@ class Dashboard extends CI_Controller {
         }
     }
 
+    /**
+     * 读取提醒信息
+     */
     public function get_notify()
     {
         //获得消息记录
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $this->load->library('curl');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $api = $this->curl->get($system['api_host'].'/notify/get_rows?uid='.UID.'&access_token='.$system['access_token']);
         if ($api['httpcode'] == 200) {
             $users = array();

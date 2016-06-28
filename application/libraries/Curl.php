@@ -8,6 +8,12 @@ class Curl
     private $_timeout = 10;
 
     /**
+     * 超时时间
+     * @var integer
+     */
+    private $_token = '';
+
+    /**
      * 初始化配置信息
      * 在控制器中调去的方式：$this->load->library('curl', array('timeout'=>30));
      * @param array $config 传递的参数
@@ -16,6 +22,8 @@ class Curl
     {
         if (isset($config['timeout']) && is_numeric($config['timeout']))
             $this->_timeout = $config['timeout'];
+        if (isset($config['token']))
+            $this->_token = $config['token'];
     }
 
     /**
@@ -117,7 +125,8 @@ class Curl
             'X-FORWARDED-FOR:'.$ip,
             'Accept-Language:zh-CN,zh;q=0.8,en;q=0.6',
             'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Charset:UTF-8,utf-8;q=0.7,*;q=0.3'
+            'Accept-Charset:UTF-8,utf-8;q=0.7,*;q=0.3',
+            'token:'.$this->_token
         );
         return $array;
     }

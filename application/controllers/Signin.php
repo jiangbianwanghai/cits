@@ -17,7 +17,9 @@ class Signin extends CI_Controller {
     public function check() {
 
         //输入合法性验证
-        $this->load->library(array('form_validation', 'curl'));
+        $this->load->library('form_validation');
+        
+
         $this->form_validation->set_rules('username', '用户名', 'trim|required',
             array('required' => '%s 不能为空')
         );
@@ -32,7 +34,8 @@ class Signin extends CI_Controller {
         //存在性验证
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/user/signin_check?username='.$this->input->post('username').'&password='.md5($this->input->post('password')).'&access_token='.$system['access_token']);
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/user/signin_check?username='.$this->input->post('username').'&password='.md5($this->input->post('password')));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
@@ -48,7 +51,7 @@ class Signin extends CI_Controller {
                 $this->online->update_by_unique(array('uid' => $output['content']['uid'], 'act_time' => time()));
 
                 //从个人信息中获取
-                $api = $this->curl->get($system['api_host'].'/user/row?uid='.$output['content']['uid'].'&access_token='.$system['access_token']);
+                $api = $this->curl->get($system['api_host'].'/user/row?uid='.$output['content']['uid']);
                 if ($api['httpcode'] == 200) {
                     $output = json_decode($api['output'], true);
                     if ($output['status']) {

@@ -15,9 +15,9 @@ class Project extends CI_Controller {
         $data['PAGE_TITLE'] = '项目团队列表';
 
         //读取系统配置信息
-        $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
 
         //获取星标项目
         $data['star'] = array();
@@ -25,7 +25,7 @@ class Project extends CI_Controller {
             $data['star'] = unserialize($this->encryption->decrypt($this->input->cookie('cits_star_project'))); //从Cookie中获取
         } else {
             //从个人信息中获取
-            $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID.'&access_token='.$system['access_token']);
+            $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID);
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
@@ -42,10 +42,10 @@ class Project extends CI_Controller {
 
         //读取项目团队数据
         $data['rows'] = array();
-        $api_url = $system['api_host'].'/project/rows?access_token='.$system['access_token'];
+        $api_url = $system['api_host'].'/project/rows';
         $data['folder'] = $this->uri->segment(3, 'all');
         if ($data['folder'] == 'my') {
-            $api_url = $system['api_host'].'/project/rows?uid='.UID.'&access_token='.$system['access_token'];
+            $api_url = $system['api_host'].'/project/rows?uid='.UID;
         }
         $api = $this->curl->get($api_url);
         if ($api['httpcode'] == 200) {
@@ -73,7 +73,7 @@ class Project extends CI_Controller {
     public function add_ajax()
     {
         //验证输入
-        $this->load->library(array('form_validation', 'curl'));
+        $this->load->library('form_validation');
         $this->form_validation->set_rules('project_name', '项目团队全称', 'trim|required',
             array('required' => '%s 不能为空')
         );
@@ -88,10 +88,10 @@ class Project extends CI_Controller {
         //写入数据
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $Post_data['project_name'] = $this->input->post('project_name');
         $Post_data['project_description'] = $this->input->post('project_description');
         $Post_data['add_user'] = UID;
-        $Post_data['access_token'] = $system['access_token'];
         $api = $this->curl->post($system['api_host'].'/project/write', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
@@ -105,7 +105,6 @@ class Project extends CI_Controller {
                 $Post_data_handle['target_type'] = 1;
                 $Post_data_handle['type'] = 1;
                 $Post_data_handle['content'] = $this->input->post('project_name');
-                $Post_data_handle['access_token'] = $system['access_token'];
                 $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
                 if ($api['httpcode'] == 200) {
                     $output = json_decode($api['output'], true);
@@ -137,7 +136,7 @@ class Project extends CI_Controller {
         $id = $this->input->post('id');
 
         //解密并验证数据合法性
-        $this->load->library(array('curl', 'encryption'));
+        $this->load->library('encryption');
         $id = $this->encryption->decrypt($id);
         if (!($id != 0 && ctype_digit($id))) {
             exit(json_encode(array('status' => false, 'error' => '参数格式错误')));
@@ -145,9 +144,9 @@ class Project extends CI_Controller {
 
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $Post_data['id'] = $id;
         $Post_data['uid'] = UID;
-        $Post_data['access_token'] = $system['access_token'];
 
         //更新到用户表中
         $api = $this->curl->post($system['api_host'].'/user/star_project_add', $Post_data);
@@ -178,7 +177,7 @@ class Project extends CI_Controller {
         $id = $this->input->post('id');
 
         //解密并验证数据合法性
-        $this->load->library(array('curl', 'encryption'));
+        $this->load->library('encryption');
         $id = $this->encryption->decrypt($id);
         if (!($id != 0 && ctype_digit($id))) {
             exit(json_encode(array('status' => false, 'error' => '参数格式错误')));
@@ -187,9 +186,9 @@ class Project extends CI_Controller {
         $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $Post_data['id'] = $id;
         $Post_data['uid'] = UID;
-        $Post_data['access_token'] = $system['access_token'];
 
         //更新到用户表中
         $api = $this->curl->post($system['api_host'].'/user/star_project_del', $Post_data);
@@ -219,10 +218,11 @@ class Project extends CI_Controller {
      */
     public function refresh()
     {
-        $this->load->library(array('curl', 'encryption'));
+        $this->load->library('encryption');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/project/cache?access_token='.$system['access_token']);
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/project/cache');
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
