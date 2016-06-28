@@ -56,9 +56,9 @@ class Plan extends CI_Controller {
         $data['type'] = $this->input->get('type', TRUE);
 
         //读取系统配置信息
-        $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $data['level'] = $this->config->item('level', 'extension');
         $data['workflow'] = $this->config->item('workflow', 'extension');
         $data['workflowfilter'] = $this->config->item('workflowfilter', 'extension');
@@ -68,7 +68,7 @@ class Plan extends CI_Controller {
         $data['planFolder'] = array();
         $data['curr_plan']['id'] = $data['curr_plan']['sha'] = 0;
         $data['curr_plan']['endtime'] = 0;
-        $api = $this->curl->get($system['api_host'].'/plan/rows_by_projectid?id='.$this->_projectid.'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/plan/rows_by_projectid?id='.$this->_projectid);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -98,7 +98,7 @@ class Plan extends CI_Controller {
         $data['total'] = 0;
         if ($data['curr_plan']) {
             //根据计划和项目id读取任务列表
-            $api = $this->curl->get($system['api_host'].'/issue/rows_by_plan?access_token='.$system['access_token'].'&projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
+            $api = $this->curl->get($system['api_host'].'/issue/rows_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
@@ -111,7 +111,7 @@ class Plan extends CI_Controller {
             }
 
             //根据计划和项目id读取参与计划的人员
-            $api = $this->curl->get($system['api_host'].'/accept/users_by_plan?access_token='.$system['access_token'].'&projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
+            $api = $this->curl->get($system['api_host'].'/accept/users_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {
@@ -135,6 +135,79 @@ class Plan extends CI_Controller {
         $data['online_users'] = $onlineUsers;
 
         $this->load->view('plan', $data);
+    }
+
+    /**
+     * 添加计划
+     */
+    public function add_ajax()
+    {
+        $this->__init();
+
+        //验证输入
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('plan_name', '计划全称', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        $this->form_validation->set_rules('plan_description', '描述', 'trim');
+        $this->form_validation->set_rules('startime', '开始时间', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        $this->form_validation->set_rules('endtime', '结束时间', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        if ($this->form_validation->run() == FALSE) {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.validation_errors());
+            exit(json_encode(array('status' => false, 'error' => validation_errors())));
+        }
+
+        //验证结束时间不能小于开始时间
+        $endtime = strtotime($this->input->post('endtime'));
+        $startime = strtotime($this->input->post('startime'));
+        if ($endtime <= $startime) {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':结束时间不能小于等于开始时间');
+            exit(json_encode(array('status' => false, 'error' => '结束时间不能小于等于开始时间')));
+        }
+
+        //写入数据
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $Post_data['project_id'] = $this->_projectid;
+        $Post_data['plan_name'] = $this->input->post('plan_name');
+        $Post_data['plan_description'] = $this->input->post('plan_description');
+        $Post_data['startime'] = $startime;
+        $Post_data['endtime'] = $endtime;
+        $Post_data['add_user'] = UID;
+        $api = $this->curl->post($system['api_host'].'/plan/write', $Post_data);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                //写入操作日志
+                $Post_data_handle['sender'] = UID;
+                $Post_data_handle['action'] = '创建';
+                $Post_data_handle['target'] = $output['content'];
+                $Post_data_handle['target_type'] = 2;
+                $Post_data_handle['type'] = 1;
+                $Post_data_handle['subject'] = $this->input->post('plan_name');
+                $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+                if ($api['httpcode'] == 200) {
+                    $output = json_decode($api['output'], true);
+                    if (!$output['status']) {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+                exit(json_encode(array('status' => true, 'message' => '创建成功')));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':创建失败');
+                exit(json_encode(array('status' => false, 'error' => '创建失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入计划信息API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
     }
 
     /**

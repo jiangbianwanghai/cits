@@ -436,10 +436,10 @@
           ?>
           <div class="media" id="comment-<?php echo $value['id'];?>">
             <div class="pull-left">
-              <div class="face"><img alt="" src="/static/avatar/<?php echo $users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
+              <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
             </div>
             <div class="media-body">
-              <span class="media-meta pull-right"><?php echo friendlydate($value['add_time']);?><?php if ($value['add_user'] == $this->input->cookie('uids')) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
+              <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == $this->input->cookie('uids')) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
               <h6 class="text-muted"><?php echo $users[$value['add_user']]['realname'];?></h6>
               <small class="text-muted"><?php if ($value['add_user'] == $issue_profile['accept_user']) { echo '当前受理人'; } else { echo '路人甲'; }?></small>
               <p><?php echo html_entity_decode($value['content']);?></p>
@@ -1011,11 +1011,10 @@ $(function(){
   var editor = new Simditor({
     textarea : $('#content'),
     toolbar : toolbar,  //工具栏
-    defaultImage : '/static/simditor-2.3.6/images/image.png', //编辑器插入图片时使用的默认图片
+    defaultImage : '<?php echo STATIC_HOST.'/'; ?>static/simditor-2.3.6/images/image.png', //编辑器插入图片时使用的默认图片
     pasteImage: true,
     upload: {
-        url: '/admin/upload',
-        params: {'<?php echo $this->security->get_csrf_token_name();?>':'<?php echo $this->security->get_csrf_hash();?>'}, //键值对,指定文件上传接口的额外参数,上传的时候随文件一起提交  
+        url: '/dashboard/upload',
         fileKey: 'upload_file', //服务器端获取文件数据的参数名  
         connectionCount: 3,  
         leaveConfirm: '正在上传文件'
@@ -1033,11 +1032,11 @@ $(function(){
     $.ajax({
       type: "POST",
       url: "/issue/coment_add_ajax",
-      data: "content="+content+"&issue_id="+issue_id+"&<?php echo $this->security->get_csrf_token_name();?>=<?php echo $this->security->get_csrf_hash();?>",
+      data: "content="+content+"&issue_id="+issue_id,
       dataType: "JSON",
       success: function(data){
         if (data.status) {
-          $("#box").append('<div class="media"><div class="pull-left"><div class="face"><img alt="" src="/static/avatar/'+data.message.username+'.jpg" align="absmiddle" title="'+data.message.realname+'"></div></div><div class="media-body"><span class="media-meta pull-right">'+data.message.addtime+'</span><h6 class="text-muted">'+data.message.realname+'</h6><small class="text-muted">'+data.message.usertype+'</small><p>'+data.message.content+'</p></div></div>');
+          $("#box").append('<div class="media"><div class="pull-left"><div class="face"><img alt="" src="'+data.message.avatar+'" align="absmiddle" title="'+data.message.realname+'"></div></div><div class="media-body"><span class="media-meta pull-right">'+data.message.addtime+'</span><h6 class="text-muted">'+data.message.realname+'</h6><small class="text-muted">'+data.message.usertype+'</small><p>'+data.message.content+'</p></div></div>');
           editor.setValue('');
         } else {
           alert('fail');
@@ -1288,8 +1287,6 @@ function tip(message, url, color, sec) {
     location.href = url;
   }, sec);
 }
-
-
 </script>
 
 </body>

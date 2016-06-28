@@ -71,10 +71,10 @@ class Issue extends CI_Controller {
         }
 
         //读取系统配置信息
-        $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $data['level'] = $this->config->item('level', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
 
         //根据项目ID获取计划列表
         $api = $this->curl->get($system['api_host'].'/plan/rows_by_projectid?id='.$this->_projectid);
@@ -101,7 +101,7 @@ class Issue extends CI_Controller {
         $this->__init();
 
         //验证输入
-        $this->load->library(array('form_validation', 'curl'));
+        $this->load->library('form_validation');
         $this->form_validation->set_rules('planid', '所属计划ID', 'trim|required',
             array('required' => '%s 不能为空')
         );
@@ -154,46 +154,83 @@ class Issue extends CI_Controller {
         $Post_data['type'] = $this->input->post('type');
         $Post_data['add_user'] = UID;
         $Post_data['accept_user'] = $this->input->post('accept_user');
+
         //如果有相关链接就序列化它
         if ($this->input->post('issue_url')) {
             $Post_data['url'] = serialize(array_filter(explode(PHP_EOL, $this->input->post('issue_url'))));
         }
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $api = $this->curl->post($system['api_host'].'/issue/write', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
+
                 //写入操作日志
                 $Post_data_handle['sender'] = UID;
                 $Post_data_handle['action'] = '创建';
                 $Post_data_handle['target'] = $output['content'];
                 $Post_data_handle['target_type'] = 3;
                 $Post_data_handle['type'] = 1;
-                $Post_data_handle['content'] = $this->input->post('issue_name');
+                $Post_data_handle['subject'] = $this->input->post('issue_name');
                 $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
                 if ($api['httpcode'] == 200) {
                     $output_handle = json_decode($api['output'], true);
-                    if ($output_handle['status']) {
-                        //通知受理人
-                        $Post_data_notify['user'] = $this->input->post('accept_user');
-                        $Post_data_notify['log_id'] = $output_handle['content'];
-                        $api = $this->curl->post($system['api_host'].'/notify/write', $Post_data_notify);
-                        if ($api['httpcode'] == 200) {
-                            $output_notify = json_decode($api['output'], true);
-                            if (!$output_notify['status']) {
-                                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$output_notify['error']);
-                            }
-                        } else {
-                            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知API异常.HTTP_CODE['.$api['httpcode'].']');
-                        }
-                    } else {
+                    if (!$output_handle['status']) {
                         log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
                     }
                 } else {
                     log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
                 }
-                exit(json_encode(array('status' => true, 'message' => '创建成功', 'content' => $output['content'])));
+                
+                //写入受理表
+                $Accept_user[1] = UID;
+                $Accept_user[2] = $this->input->post('accept_user');
+                foreach ($Accept_user as $key => $value) {
+                    $Post_data_accept['accept_user'] = $value;
+                    $Post_data_accept['issue_id'] = $output['content'];
+                    $Post_data_accept['flow'] = $key;
+                    $api = $this->curl->post($system['api_host'].'/accept/write', $Post_data_accept);
+                    if ($api['httpcode'] == 200) {
+                        $output_accept = json_decode($api['output'], true);
+                        if (!$output_accept['status']) {
+                            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入受理人异常-'.$output_accept['error']);
+                        }
+                    } else {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入受理人API异常.HTTP_CODE['.$api['httpcode'].']');
+                    }
+                }
+
+                //写入订阅表
+                $Subscription_user = array(UID, $this->input->post('accept_user'));
+                foreach ($Subscription_user as $key => $value) {
+                    $Post_data_subscription['target'] = $output['content'];
+                    $Post_data_subscription['target_type'] = 3;
+                    $Post_data_subscription['user'] = $value;
+                    $api = $this->curl->post($system['api_host'].'/subscription/write', $Post_data_subscription);
+                    if ($api['httpcode'] == 200) {
+                        $output_subscription = json_decode($api['output'], true);
+                        if (!$output_subscription['status']) {
+                            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入订阅异常-'.$output_subscription['error']);
+                        }
+                    } else {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入订阅API异常.HTTP_CODE['.$api['httpcode'].']');
+                    }
+                }
+
+                //发送提醒
+                $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$output['content'].'|3|'.UID.'&auth=mypass123'); //格式:log_id|target_id|target_type|senderi_id
+                if ($api['httpcode'] == 200) {
+                    if ($api['output'] != 'HTTPSQS_PUT_OK') {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入提醒异常-'.$api['output']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':打队列API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+                
+                $this->load->helper('alphaid');
+                exit(json_encode(array('status' => true, 'message' => '创建成功', 'content' => alphaid($output['content']))));
             } else {
                 log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':创建失败：'.$output['error']);
                 exit(json_encode(array('status' => false, 'error' => '创建失败：'.$output['error'])));
@@ -222,13 +259,13 @@ class Issue extends CI_Controller {
         $id = alphaid($id, 1);
 
         //读取系统配置信息
-        $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
         $data['level'] = $this->config->item('level', 'extension');
 
         //根据项目ID获取计划列表
-        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id.'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -266,10 +303,11 @@ class Issue extends CI_Controller {
         }
 
         //验证任务是否存在
-        $this->load->library(array('form_validation', 'curl'));
+        $this->load->library('form_validation');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id.'&access_token='.$system['access_token']);
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -315,7 +353,6 @@ class Issue extends CI_Controller {
         $Post_data['level'] = $this->input->post('level');
         $Post_data['type'] = $this->input->post('type');
         $Post_data['last_user'] = UID;
-        $Post_data['access_token'] = $system['access_token'];
         //如果有相关链接就序列化它
         if ($this->input->post('issue_url')) {
             $Post_data['url'] = serialize(array_filter(explode(PHP_EOL, $this->input->post('issue_url'))));
@@ -330,14 +367,14 @@ class Issue extends CI_Controller {
                 $Post_data_handle['target'] = $id;
                 $Post_data_handle['target_type'] = 3;
                 $Post_data_handle['type'] = 1;
+                $Post_data_handle['subject'] = $profile['issue_name'];
                 $Post_data_handle['content'] = serialize($profile);
-                $Post_data_handle['access_token'] = $system['access_token'];
                 $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
                 if ($api['httpcode'] == 200) {
                     $output_handle = json_decode($api['output'], true);
                     if ($output_handle['status']) {
                         //发送通知提醒
-                        $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$id.'|3&auth=mypass123'); //格式:log_id|target_id|target_type
+                        $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$id.'|3|'.UID.'&auth=mypass123'); //格式:log_id|target_id|target_type|sender_id
                         if ($api['httpcode'] == 200) {
                             if ($api['output'] != 'HTTPSQS_PUT_OK') {
                                 log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$api['output']);
@@ -383,18 +420,18 @@ class Issue extends CI_Controller {
         $this->__init();
 
         //解析url传值
-        $this->load->helper('alphaid');
+        $this->load->helper(array('alphaid', 'timediff'));
         $id = $this->uri->segment(3, 0);
         $data['issueid'] = $id;
         $id = alphaid($id, 1);
 
         //根据id获取任务信息
-        $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $data['level'] = $this->config->item('level', 'extension');
         $data['env'] = $this->config->item('env', 'extension');
-        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id.'&access_token='.$system['access_token']);
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
@@ -411,7 +448,7 @@ class Issue extends CI_Controller {
 
         //读取相关提测记录
         $data['commit'] = array('total' => 0, 'data' => array());
-        $api = $this->curl->get($system['api_host'].'/commit/get_rows_by_issue?id='.$id.'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/commit/get_rows_by_issue?id='.$id);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -439,7 +476,7 @@ class Issue extends CI_Controller {
 
         //获取相关BUG记录
         $data['bug'] = array('total' => 0, 'data' => array());
-        $api = $this->curl->get($system['api_host'].'/bug/get_rows_by_issue?id='.$id.'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/bug/get_rows_by_issue?id='.$id);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -463,7 +500,7 @@ class Issue extends CI_Controller {
 
         //读取所属计划
         $data['plan_profile'] = array();
-        $api = $this->curl->get($system['api_host'].'/plan/profile?id='.$data['issue_profile']['plan_id'].'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/plan/profile?id='.$data['issue_profile']['plan_id']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -476,7 +513,7 @@ class Issue extends CI_Controller {
 
         //读取受理信息
         $data['accept_user'] = array();
-        $api = $this->curl->get($system['api_host'].'/accept/get_rows_by_issue?id='.$id.'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/accept/get_rows_by_issue?id='.$id);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -491,7 +528,7 @@ class Issue extends CI_Controller {
         
         //读取任务相关的评论
         $data['comment'] = array('total' => 0, 'data' => array());
-        $api = $this->curl->get($system['api_host'].'/comment/get_rows_by_id?id='.$id.'&table=issue&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/comment/get_rows_by_id?id='.$id.'&type=issue');
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -502,18 +539,121 @@ class Issue extends CI_Controller {
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
+        //刷新在线用户列表（埋点）
+        $this->load->model('Model_online', 'online', TRUE);
+        $this->online->refresh(UID);
+        $onlineUsers = $this->online->users();
+        $data['online_users'] = $onlineUsers;
+
         $this->load->view('issue_view', $data);
 
     }
 
     /**
-     * 计算提测成功率
-     *
-     * 算法：
+     * 添加评论
      */
-    public function rate()
-    {
+    public function coment_add_ajax() {
+
         $this->__init();
 
+        //验证输入
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('content', '计划全称', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        $this->form_validation->set_rules('issue_id', '任务id', 'trim|required',
+            array('required' => '%s 不能为空')
+        );
+        if ($this->form_validation->run() == FALSE) {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.validation_errors());
+            exit(json_encode(array('status' => false, 'error' => validation_errors())));
+        }
+        $this->load->helper('alphaid');
+        $id = $this->input->post('issue_id');
+        $id = alphaid($id, 1);
+
+        //根据id获取任务信息
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':任务不存在。任务id:['.$id.']');
+                exit(json_encode(array('status' => false, 'error' => '任务不存在')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //写入评论
+        $Post_data['id'] = $id;
+        $Post_data['content'] = $this->input->post('content');
+        $Post_data['type'] = 'issue';
+        $Post_data['add_user'] = UID;
+        $api = $this->curl->post($system['api_host'].'/comment/write', $Post_data);
+        if ($api['httpcode'] == 200) {
+            $output_comment = json_decode($api['output'], true);
+            if (!$output_comment['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':评论发表失败');
+                exit(json_encode(array('status' => false, 'error' => '评论发表失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入评论API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '写入评论API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        if (UID == $output['content']['accept_user']) {
+            $usertype = '当前受理人';
+        } else {
+            $usertype = '路人甲';
+        }
+        //载入用户缓存文件
+        $users = array();
+        if (file_exists(APPPATH.'cache/user.cache.php')) {
+          $users = file_get_contents(APPPATH.'cache/user.cache.php');
+          $users = unserialize($users);
+        }
+        $callBack = array(
+            'status' => true,
+            'message' => array(
+                'content'=>html_entity_decode($this->input->post('content')),
+                'realname'=>$users[UID]['realname'],
+                'avatar'=> AVATAR_HOST.'/'.$users[UID]['username'].'.jpg',
+                'addtime' => '1秒',
+                'usertype' => $usertype
+            )
+        );
+        
+        //写操作日志
+        $Post_data_handle['sender'] = UID;
+        $Post_data_handle['action'] = '评论';
+        $Post_data_handle['target'] = $id;
+        $Post_data_handle['target_type'] = 3;
+        $Post_data_handle['type'] = 1;
+        $Post_data_handle['subject'] = $output['content']['issue_name'];
+        $Post_data_handle['content'] = $output_comment['content'];
+        $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+        if ($api['httpcode'] == 200) {
+            $output_handle = json_decode($api['output'], true);
+            if ($output_handle['status']) {
+                //发送通知提醒
+                $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$id.'|3|'.UID.'&auth=mypass123'); //格式:log_id|target_id|target_type|sender_id
+                if ($api['httpcode'] == 200) {
+                    if ($api['output'] != 'HTTPSQS_PUT_OK') {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$api['output']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':打队列API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+        }
+        echo json_encode($callBack);
     }
 }

@@ -183,7 +183,6 @@ class Project extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => '参数格式错误')));
         }
         
-        $this->load->library('curl');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));

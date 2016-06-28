@@ -68,6 +68,7 @@ class Dashboard extends CI_Controller {
     public function get_notify()
     {
         //获得消息记录
+        $this->load->helper('alphaid');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
@@ -83,10 +84,10 @@ class Dashboard extends CI_Controller {
                 foreach ($output['content']['data'] as $key => $value) {
                     $output['content']['data'][$key]['user_realname'] = $users[$value['user']]['realname'];
                     $output['content']['data'][$key]['log_action'] = $value['log']['action'];
-                    $output['content']['data'][$key]['log_content'] = $value['log']['content'];
+                    $output['content']['data'][$key]['log_subject'] = $value['log']['subject'];
                     
                     if ($value['log']['target_type'] == '3') {
-                        $url = 'issue/view/'.$value['log']['target'];
+                        $url = 'issue/view/'.alphaid($value['log']['target']).'?is_read=yes';
                         $output['content']['data'][$key]['log_target_type'] = '任务';
                     }
                     $output['content']['data'][$key]['log_url'] = $url;

@@ -253,7 +253,7 @@
         <div class="form-group">
           <label class="col-sm-3 control-label">计划简介 <span class="asterisk">*</span></label>
           <div class="col-sm-9">
-            <textarea rows="5" class="form-control" id="plan_discription" name="plan_discription" placeholder="最少5个字符，最长300个字符" required></textarea>
+            <textarea rows="5" class="form-control" id="plan_description" name="plan_description" placeholder="最少5个字符，最长300个字符" required></textarea>
           </div>
         </div>
         <div class="form-group">
@@ -301,8 +301,7 @@ function callBack(data) {
     jQuery.gritter.add({
       title: '提醒',
       text: data.message,
-        class_name: 'growl-success',
-        image: '/static/images/screen.png',
+      class_name: 'growl-success',
       sticky: false,
       time: ''
     });
@@ -313,8 +312,7 @@ function callBack(data) {
     jQuery.gritter.add({
       title: '提醒',
       text: data.error,
-        class_name: 'growl-danger',
-        image: '/static/images/screen.png',
+      class_name: 'growl-danger',
       sticky: false,
       time: ''
     });
@@ -331,7 +329,7 @@ jQuery(document).ready(function(){
   $("#basicForm").submit(function(){
     $(this).ajaxSubmit({
       type:"post",
-      url: "/plan/add_ajax/"+<?php if ($curr_plan['sha']) { echo $curr_plan['sha']; } else { echo '0'; } ?>,
+      url: "/plan/add_ajax/"+<?php if ($curr_plan['id']) { echo $curr_plan['id']; } else { echo '0'; } ?>,
       dataType: "JSON",
       beforeSubmit:validForm,
       success:callBack

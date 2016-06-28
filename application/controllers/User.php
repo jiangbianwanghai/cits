@@ -20,10 +20,11 @@ class User extends CI_Controller {
      */
     public function refresh()
     {
-        $this->load->library(array('curl', 'encryption'));
+        $this->load->library('encryption');
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
-        $api = $this->curl->get($system['api_host'].'/user/cache?access_token='.$system['access_token']);
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/user/cache');
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
