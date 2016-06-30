@@ -310,7 +310,7 @@
               </tr>
               <tr>
                 <td width="100px">当前受理人</td>
-                <td><a href="javascript:;" id="country" data-type="select2" data-value="<?php echo $issue_profile['accept_user'];?>" data-title="更改受理人"></a></td>
+                <td><a href="javascript:;" id="country" data-type="select2" data-value="<?php echo alphaid($issue_profile['accept_user']);?>" data-title="更改受理人"></a></td>
                 <td width="100px">受理时间</td>
                 <td><?php echo $issue_profile['last_time'] ? date("Y/m/d H:i:s", $issue_profile['last_time']) : '-';?></td>
               </tr>
@@ -930,7 +930,7 @@
 
     // Select 2 (dropdown mode)
     var countries = [];
-    $.each({<?php foreach($users as $val) { ?>"<?php echo $val['uid'];?>": "<?php echo $val['realname'];?>",<?php } ?> }, function(k, v) {
+    $.each({<?php foreach($users as $val) { ?>"<?php echo alphaid($val['uid']);?>": "<?php echo $val['realname'];?>",<?php } ?> }, function(k, v) {
         countries.push({id: k, text: v});
     });
 
@@ -1198,9 +1198,9 @@ $(function(){
           $(this).hide();
           $("#td-test").addClass('blue');
           $("#td-test").text('测试中');
-          tip(data.message, data.url, 'success', 2000);
+          tip(data.message, window.location.href, 'success', 2000);
         } else {
-          tip(data.message, data.url, 'danger', 5000);
+          tip(data.message, window.location.href, 'danger', 5000);
         };
       }
     });
@@ -1221,9 +1221,9 @@ $(function(){
             $(this).hide();
             $("#td-over").addClass('blue');
             $("#td-over").text('开发完毕');
-            tip(data.message, data.url, 'success', 2000);
+            tip(data.message, window.location.href, 'success', 2000);
           } else {
-            tip(data.message, data.url, 'danger', 5000);
+            tip(data.message, window.location.href, 'danger', 5000);
           };
         }
       });

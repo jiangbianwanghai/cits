@@ -690,11 +690,6 @@ class Issue extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => '读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
 
-        //验证是否有权限操作
-        if ($output['content']['accept_user'] != UID) {
-            exit(json_encode(array('status' => false, 'message' => '你不是受理人，无权操作')));
-        }
-
         //更改工作流
         $Post_data['uid'] = UID;
         $Post_data['id'] = $id;
@@ -713,7 +708,7 @@ class Issue extends CI_Controller {
 
         //写操作日志
         $Post_data_handle['sender'] = UID;
-        $Post_data_handle['action'] = '变更工作流';
+        $Post_data_handle['action'] = '变更';
         $Post_data_handle['target'] = $id;
         $Post_data_handle['target_type'] = 3;
         $Post_data_handle['type'] = 1;
@@ -811,5 +806,101 @@ class Issue extends CI_Controller {
         }
 
         exit(json_encode($list));
+    }
+
+    public function change_accept()
+    {
+        //获取参数
+        $id = $this->uri->segment(3, 0);
+        $uid = $this->input->get("value", TRUE);
+        $this->load->helper(array('alphaid', 'timediff'));
+        $id = alphaid($id, 1);
+        $uid = alphaid($uid, 1);
+
+        //验证ID合法性
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':任务不存在。任务id:['.$id.']');
+                exit(json_encode(array('status' => false, 'error' => '任务不存在')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //载入用户缓存文件
+        $users = array();
+        if (file_exists(APPPATH.'cache/user.cache.php')) {
+          $users = file_get_contents(APPPATH.'cache/user.cache.php');
+          $users = unserialize($users);
+        }
+
+        //写入受理表
+        $Post_data_accept['accept_user'] = $uid;
+        $Post_data_accept['issue_id'] = $id;
+        $Post_data_accept['flow'] = 3;
+        $api = $this->curl->post($system['api_host'].'/accept/write', $Post_data_accept);
+        if ($api['httpcode'] == 200) {
+            $output_accept = json_decode($api['output'], true);
+            if (!$output_accept['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入受理人异常-'.$output_accept['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入受理人API异常.HTTP_CODE['.$api['httpcode'].']');
+        }
+
+        //写入订阅表
+        $Post_data_subscription['target'] = $id;
+        $Post_data_subscription['target_type'] = 3;
+        $Post_data_subscription['user'] = $uid;
+        $api = $this->curl->post($system['api_host'].'/subscription/write', $Post_data_subscription);
+        if ($api['httpcode'] == 200) {
+            $output_subscription = json_decode($api['output'], true);
+            if (!$output_subscription['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入订阅异常-'.$output_subscription['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入订阅API异常.HTTP_CODE['.$api['httpcode'].']');
+        }
+
+        //写操作日志
+        $Post_data_handle['sender'] = UID;
+        $Post_data_handle['action'] = '指派';
+        $Post_data_handle['target'] = $id;
+        $Post_data_handle['target_type'] = 3;
+        $Post_data_handle['type'] = 1;
+        $Post_data_handle['subject'] = $output['content']['issue_name'];
+        $Post_data_handle['content'] = $users[$uid]['realname'];
+        $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+        if ($api['httpcode'] == 200) {
+            $output_handle = json_decode($api['output'], true);
+            if ($output_handle['status']) {
+                
+                //发送提醒
+                $Post_data_notify['user'] = $uid;
+                $Post_data_notify['log_id'] = $output_handle['content'];
+                $api_notify = $this->curl->post($system['api_host'].'/notify/write', $Post_data_notify);
+                if ($api_notify['httpcode'] == 200) {
+                    $output_notify = json_decode($api_notify['output'], true);
+                    if (!$output_notify['status']) {
+                        echo '写入通知异常-'.$output_notify['error'].PHP_EOL;
+                    }
+                } else {
+                    echo '写入提醒API异常.HTTP_CODE['.$api_notify['httpcode'].']'.PHP_EOL;
+                }
+
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+        }
+
+        echo 1;
     }
 }

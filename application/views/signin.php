@@ -24,10 +24,11 @@
       <div class="col-md-5">
       <form method="post" action="/admin/login">
         <h4 class="nomargin">登录</h4>
-        <p class="mt5 mb20">没有帐号，请移步 <a href="/signup">注册</a></p>
         <input name="username" id="username" type="text" class="form-control uname" placeholder="用户名" />
         <input name="password" id="password" type="password" class="form-control pword" placeholder="密码" />
         <button name="button" id="button" type="button" class="btn btn-success btn-block">登入</button>
+        <div class="mb20"></div>
+        <div class="row"><div class="col-sm-6"><a href="/forgot">忘记密码？</a></div><div class="col-sm-6" align="right"><a href="/signup">注册</a></div></div>
       </form>
       </div><!-- col-sm-5 -->
     </div><!-- row -->

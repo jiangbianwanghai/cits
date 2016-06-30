@@ -130,7 +130,7 @@ function callBack(data) {
       time: ''
     });
     setTimeout(function(){
-      location.href = data.url;
+      location.href = '/issue/view/<?php echo $issueid;?>';
     }, 2000);
   } else {
     jQuery.gritter.add({
@@ -141,7 +141,7 @@ function callBack(data) {
       time: ''
     });
     setTimeout(function(){
-      location.href = data.url;
+      location.href = '/commit/add/<?php echo $issueid;?>';
     }, 2000);
   }
 }
