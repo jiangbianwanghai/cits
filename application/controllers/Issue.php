@@ -656,4 +656,160 @@ class Issue extends CI_Controller {
         }
         echo json_encode($callBack);
     }
+
+    /**
+     * 更改工作流
+     */
+    public function change_flow()
+    {
+        //获取传入参数
+        $id = $this->uri->segment(3, 0);
+        $flow = $this->uri->segment(4, 0);
+        $this->load->helper('alphaid');
+        $id = alphaid($id, 1);
+
+        //验证工作流参数合法性
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $workflowfilter = $this->config->item('workflowfilter', 'extension');
+        if (!isset($workflowfilter[$flow])) {
+            exit(json_encode(array('status' => false, 'message' => '参数不合法')));
+        }
+
+        //验证ID合法性
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':任务不存在。任务id:['.$id.']');
+                exit(json_encode(array('status' => false, 'error' => '任务不存在')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //验证是否有权限操作
+        if ($output['content']['accept_user'] != UID) {
+            exit(json_encode(array('status' => false, 'message' => '你不是受理人，无权操作')));
+        }
+
+        //更改工作流
+        $Post_data['uid'] = UID;
+        $Post_data['id'] = $id;
+        $Post_data['flow'] = $workflowfilter[$flow]['id'];
+        $api = $this->curl->post($system['api_host'].'/issue/change_flow', $Post_data);
+        if ($api['httpcode'] == 200) {
+            $output_change = json_decode($api['output'], true);
+            if (!$output_change['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':更改工作流失败');
+                exit(json_encode(array('status' => false, 'error' => '更改工作流失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':更改工作流API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '更改工作流API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //写操作日志
+        $Post_data_handle['sender'] = UID;
+        $Post_data_handle['action'] = '变更工作流';
+        $Post_data_handle['target'] = $id;
+        $Post_data_handle['target_type'] = 3;
+        $Post_data_handle['type'] = 1;
+        $Post_data_handle['subject'] = $output['content']['issue_name'];
+        $Post_data_handle['content'] = $workflowfilter[$flow]['name'];
+        $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+        if ($api['httpcode'] == 200) {
+            $output_handle = json_decode($api['output'], true);
+            if ($output_handle['status']) {
+                //发送通知提醒
+                $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$id.'|3|'.UID.'&auth=mypass123'); //格式:log_id|target_id|target_type|sender_id
+                if ($api['httpcode'] == 200) {
+                    if ($api['output'] != 'HTTPSQS_PUT_OK') {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$api['output']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':打队列API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+        }
+        exit(json_encode(array('status' => true, 'message' => '更改成功')));
+    }
+
+    /**
+     * 读取任务相关的操作日志
+     */
+    public function log_list()
+    {
+        //获取传入参数
+        $id = $this->uri->segment(3, 0);
+        $this->load->helper(array('alphaid', 'timediff'));
+        $id = alphaid($id, 1);
+
+        //验证工作流参数合法性
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+
+        //验证ID合法性
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':任务不存在。任务id:['.$id.']');
+                exit(json_encode(array('status' => false, 'error' => '任务不存在')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取任务详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        $users = array();
+        if (file_exists(APPPATH.'cache/user.cache.php')) {
+          $users = file_get_contents(APPPATH.'cache/user.cache.php');
+          $users = unserialize($users);
+        }
+
+        //读取操作日志
+        $api = $this->curl->get($system['api_host'].'/handle/get_rows?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output_log = json_decode($api['output'], true);
+            if (!$output_log['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':操作日志不存在');
+                exit(json_encode(array('status' => false, 'error' => '操作日志不存在')));
+            } else {
+                $list['total'] = $output_log['content']['total'];
+                foreach ($output_log['content']['data'] as $key => $value) {
+                    $list['comment'][$key]['realname'] = $users[$value['sender']]['realname'];
+                    $list['comment'][$key]['avatar'] = AVATAR_HOST.'/'.$users[$value['sender']]['username'].'.jpg';
+                    $list['comment'][$key]['friendtime'] = timediff($value['add_time'], time());
+                    $list['comment'][$key]['content'] = $value['subject'];
+                    $subject = '给你';
+                    $subject = $value['action'].'了';
+                    if ($value['target_type'] == '3') {
+                        $subject .= '任务';
+                        $url = '/issue/view/'.alphaid($value['target']);
+                    }
+                    if ($value['action'] == '评论') {
+                        $url .= '#comment-'.alphaid($value['content']);
+                    }
+                    $end = '';
+                    if ($value['action'] == '变更') {
+                        $end = ' 的工作流状态为 '.$value['content'];
+                    }
+                    $list['comment'][$key]['content'] = $subject.' #<a href="'.$url.'">'.$value['subject'].'</a>'.$end;
+                }
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取操作日志API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        exit(json_encode($list));
+    }
 }

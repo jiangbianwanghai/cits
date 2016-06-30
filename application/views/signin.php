@@ -47,6 +47,11 @@
 
   //验证登录函数
   function login() {
+    var redirect_url = $.cookie('cits_redirect_url');
+    $.cookie('cits_redirect_url', '', {expires:-1});
+    if (!redirect_url) {
+      redirect_url = '/';
+    }
     $.ajax({
       type: "POST",
       url: "/signin/check",
@@ -62,7 +67,7 @@
             time: ''
           });
           setTimeout(function(){
-            location.href = '/';
+            location.href = redirect_url;
           }, 500);
         } else {
           jQuery.gritter.add({

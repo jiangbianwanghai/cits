@@ -84,7 +84,7 @@
                 <!-- #开发-我要开发# -->
                 <?php if ($issue_profile['workflow'] >= 1) {?>
                 <td class="blue">开发中</td>
-                <?php } elseif ($issue_profile['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php } elseif ($issue_profile['accept_user'] == UID) {?>
                 <td style="text-align:center;" id="td-dev"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger dev">我要开发</a></td>
                 <?php } else { ?>
                 <td style="text-align:center;">开发中</td>
@@ -93,9 +93,9 @@
                 <?php if ($issue_profile['workflow'] >= 2) {?>
                 <td class="blue">开发完毕</td>
                 <?php } else {?>
-                <?php if ($issue_profile['workflow']  == 1 && $issue_profile['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php if ($issue_profile['workflow']  == 1 && $issue_profile['accept_user'] == UID) {?>
                 <td style="text-align:center;" width="200px" id="td-over">
-                  <a href="/test/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">提交代码</a> 
+                  <a href="/commit/add/<?php echo $issueid;?>" class="label label-danger">提交代码</a> 
                   <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary over">开发完毕</a>
                 </td>
                 <?php } else {?>
@@ -113,9 +113,9 @@
                 <?php if ($issue_profile['workflow'] >= 4) {?>
                 <td class="blue">修复完毕</td>
                 <?php } else {?>
-                <?php if ($issue_profile['workflow'] == 3 && $accept_user && isset($accept_user['2']) && $accept_user['2']['accept_user'] == $this->input->cookie('uids')) { ?>
+                <?php if ($issue_profile['workflow'] == 3 && $accept_user && isset($accept_user['2']) && $accept_user['2']['accept_user'] == UID) { ?>
                 <td style="text-align:center;" width="200px" id="td-fix">
-                  <a href="/test/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">提交代码</a> 
+                  <a href="/commit/add/<?php echo $issueid;?>" class="label label-danger">提交代码</a> 
                   <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary fix">修复完毕</a>
                 </td>
                 <?php }else { ?>
@@ -128,9 +128,9 @@
                 <?php if ($issue_profile['workflow'] >= 5) {?>
                 <td class="blue">测试中</td>
                 <?php } else {?>
-                <?php if (($issue_profile['workflow'] == 2 || $issue_profile['workflow'] == 4)&& $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php if (($issue_profile['workflow'] == 2 || $issue_profile['workflow'] == 4)&& $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == UID) {?>
                 <td style="text-align:center;" id="td-test"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger test">我要测试</a></td>
-                <?php } elseif ($issue_profile['workflow'] == 2 && $accept_user && !isset($accept_user['3']) && $accept_user['2']['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php } elseif ($issue_profile['workflow'] == 2 && $accept_user && !isset($accept_user['3']) && $accept_user['2']['accept_user'] == UID) {?>
                 <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
                 <?php } else {?>
                 <td style="text-align:center;">测试中</td>
@@ -141,7 +141,7 @@
                 <?php if ($issue_profile['workflow'] >= 6) { ?>
                   <td class="blue">测试通过</td>
                 <?php } else { ?>
-                  <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == $this->input->cookie('uids')) {?>
+                  <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == UID) {?>
                   <td style="text-align:center;" width="200px" id="td-wait">
                     <a href="/bug/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">反馈BUG</a> 
                     <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary waits">测试通过</a>
@@ -155,9 +155,9 @@
                 <?php if ($issue_profile['workflow'] == 7) { ?>
                 <td class="blue">已上线</td>
                 <?php } else { ?>
-                <?php if ($issue_profile['workflow'] == 6 && $accept_user && isset($accept_user['4']) && $accept_user['4']['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php if ($issue_profile['workflow'] == 6 && $accept_user && isset($accept_user['4']) && $accept_user['4']['accept_user'] == UID) {?>
                 <td style="text-align:center;" id="td-online"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger onlines">通知上线</a></td>
-                <?php } elseif ($issue_profile['workflow'] == 6 && $accept_user && !isset($accept_user['4']) && $accept_user['3']['accept_user'] == $this->input->cookie('uids')) {?>
+                <?php } elseif ($issue_profile['workflow'] == 6 && $accept_user && !isset($accept_user['4']) && $accept_user['3']['accept_user'] == UID) {?>
                 <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
                 <?php } else {?>
                 <td style="text-align:center;">上线</td>
@@ -173,10 +173,10 @@
           <p><?php echo $issue_profile['issue_summary'];?></p>
           <br />
           <div align="right">
-          <?php if (($issue_profile['workflow'] == 1 || $issue_profile['workflow'] == 3) && isset($accept_user['2']) && $accept_user['2']['accept_user'] != $this->input->cookie('uids')) { ?>
-          <a href="/test/add/<?php echo $issueid;?>" class="label label-danger">其他人可以点击此处提交代码</a>
+          <?php if (($issue_profile['workflow'] == 1 || $issue_profile['workflow'] == 3) && isset($accept_user['2']) && $accept_user['2']['accept_user'] != UID) { ?>
+          <a href="/commit/add/<?php echo $issueid;?>" class="label label-danger">其他人可以点击此处提交代码</a>
           <?php } ?>
-          <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && isset($accept_user['3']) && $accept_user['3']['accept_user'] != $this->input->cookie('uids')) { ?>
+          <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && isset($accept_user['3']) && $accept_user['3']['accept_user'] != UID) { ?>
            <a href="/bug/add/<?php echo $issueid;?>" class="label label-danger">其他人可以点击此处反馈BUG</a>
           <?php } ?>
           </div>
@@ -427,45 +427,57 @@
           <?php } ?>
         </div>
       </div>
-
-      <div class="panel">
-        <div class="panel-body">
-          <?php
-            if ($comment['data']) {
-              foreach ($comment['data'] as $value) {
-          ?>
-          <div class="media" id="comment-<?php echo $value['id'];?>">
-            <div class="pull-left">
-              <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
-            </div>
-            <div class="media-body">
-              <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == $this->input->cookie('uids')) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
-              <h6 class="text-muted"><?php echo $users[$value['add_user']]['realname'];?></h6>
-              <small class="text-muted"><?php if ($value['add_user'] == $issue_profile['accept_user']) { echo '当前受理人'; } else { echo '路人甲'; }?></small>
-              <p><?php echo html_entity_decode($value['content']);?></p>
-            </div>
-          </div>
-          <?php
-              }
-            }
-          ?>
-          <div id="box"></div>
-          <div class="media">
-            <div class="pull-left">
-              <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[UID]['username']?>.jpg" align="absmiddle" title="<?php echo $users[UID]['realname'];?>"></div>
-            </div>
-            <div class="media-body">
-              <input type="text" class="form-control" id="post-commit" placeholder="我要发表评论">
-              <div id="simditor" style="display:none;">
-                <textarea id="content" name="content"></textarea>
-                <div class="mb10"></div>
-                <input type="hidden" value="<?php echo $issueid;?>" id="issue_id" name="issue_id">
-                <button class="btn btn-primary" id="btnSubmit">提交</button>
+                    
+      <ul class="nav nav-tabs nav-default">
+        <li class="active"><a data-toggle="tab" href="#all"><strong>评论</strong></a></li>
+        <li><a data-toggle="tab" href="#added" id="log-list" data-id="<?php echo $issueid; ?>"><strong>操作日志</strong></a></li>
+      </ul>
+      <div class="tab-content">
+        <div id="all" class="tab-pane active"> 
+          <div class="panel">
+            <div class="panel-body">
+              <?php
+                if ($comment['data']) {
+                  foreach ($comment['data'] as $value) {
+              ?>
+              <div class="media">
+                <div class="pull-left">
+                  <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
+                </div>
+                <div class="media-body">
+                  <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == UID) {?><br /><a class="del" ids="<?php echo alphaid($value['id']);?>" href="javascript:;">删除</a><?php } ?></span>
+                  <h6 class="text-muted"><?php echo $users[$value['add_user']]['realname'];?></h6>
+                  <small class="text-muted"><?php if ($value['add_user'] == $issue_profile['accept_user']) { echo '当前受理人'; } else { echo '路人甲'; }?></small>
+                  <div id="comment-<?php echo alphaid($value['id']);?>"><?php echo html_entity_decode($value['content']);?></div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div><!-- row -->  
-      </div><!-- panel-body -->
+              <?php
+                  }
+                }
+              ?>
+              <div id="box"></div>
+              <div class="media">
+                <div class="pull-left">
+                  <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[UID]['username']?>.jpg" align="absmiddle" title="<?php echo $users[UID]['realname'];?>"></div>
+                </div>
+                <div class="media-body">
+                  <input type="text" class="form-control" id="post-commit" placeholder="我要发表评论">
+                  <div id="simditor" style="display:none;">
+                    <textarea id="content" name="content"></textarea>
+                    <div class="mb10"></div>
+                    <input type="hidden" value="<?php echo $issueid;?>" id="issue_id" name="issue_id">
+                    <button class="btn btn-primary" id="btnSubmit">提交</button>
+                  </div>
+                </div>
+              </div>
+            </div><!-- row -->  
+          </div><!-- panel-body -->     
+        </div><!-- tab-pane -->
+          
+        <div id="added" class="tab-pane">
+            loading...
+        </div><!-- tab-pane -->
+      </div><!-- tab-content -->
     </div><!-- panel -->
   </div>
   <p class="text-right"><small>页面执行时间 <em>{elapsed_time}</em> 秒 使用内存 {memory_usage}</small></p>  
@@ -1000,6 +1012,25 @@
         });
     });
 
+    //读取任务相关的操作日志
+    $("#log-list").click(function(){
+      id = $(this).attr("data-id");
+        $.ajax({
+          type: "GET",
+          url: "/issue/log_list/"+id,
+          dataType: "JSON",
+          success: function(data){
+            if (data.total) {
+              var log_list = '';
+              for(var p in data.comment){
+                log_list += '<tr class="unread"><td></td><td><a href="" class="star"><i class="fa fa-dot-circle-o"></i></a></td><td><div class="media"><a href="#" class="face"><img alt="" src="'+data.comment[p].avatar+'"></a><div class="media-body"><span class="media-meta pull-right">'+data.comment[p].friendtime+'前</span><h4 class="text-primary">'+data.comment[p].realname+'</h4><small class="text-muted"></small><p class="email-summary">'+data.comment[p].content+'</p></div></div></td></tr>';
+              }
+              $("#added").html('<div class="table-responsive"><table class="table table-email"><tbody>'+log_list+'</tbody></table></div>');
+            }
+          }
+        });
+    });
+
   });
 </script>
 
@@ -1146,9 +1177,9 @@ $(function(){
           $(this).hide();
           $("#td-dev").addClass('blue');
           $("#td-dev").text('开发中');
-          tip(data.message, data.url, 'success', 2000);
+          tip(data.message, window.location.href, 'success', 2000);
         } else {
-          tip(data.message, data.url, 'danger', 5000);
+          tip(data.message, window.location.href, 'danger', 5000);
         };
       }
     });
@@ -1271,6 +1302,9 @@ $(function(){
     }
   });
 
+  var ss = window.location.href.split("#");
+  $('#'+ss[1]).css('background','#f1f1f1')
+
 });
 
 //消息提醒通用组建配置
@@ -1278,8 +1312,7 @@ function tip(message, url, color, sec) {
   jQuery.gritter.add({
     title: '提醒',
     text: message,
-      class_name: 'growl-'+color,
-      image: '/static/images/screen.png',
+    class_name: 'growl-'+color,
     sticky: false,
     time: ''
   });

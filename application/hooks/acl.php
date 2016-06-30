@@ -19,6 +19,7 @@ class acl{
         if (!in_array($this->CI->uri->segment(1), array('signin', 'signup'))) {
             if (!$this->CI->input->cookie('cits_auth')) {
                 $this->CI->load->helper('url');
+                $this->CI->input->set_cookie(array('name' => 'cits_redirect_url', 'value' => $_SERVER['REQUEST_URI'], 'expire' => 86400));
                 redirect('/signin', 'location');
             }
         }

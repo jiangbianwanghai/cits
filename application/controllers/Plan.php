@@ -41,10 +41,12 @@ class Plan extends CI_Controller {
 
         $data['PAGE_TITLE'] = '计划列表';
 
+        $this->load->helper(array('timediff', 'alphaid'));
+
         //获取传值
         $curr_plan = $this->input->get('planid', TRUE);
         if ($curr_plan) {
-            $curr_plan = $this->encryption->decrypt($curr_plan);
+            $curr_plan = alphaid($curr_plan, 1);
             if (!($curr_plan != 0 && ctype_digit($curr_plan))) {
                 log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':计划id异常');
                 show_error('计划id异常', 500, '错误');
@@ -125,8 +127,6 @@ class Plan extends CI_Controller {
                 show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
             }
         }
-
-        $this->load->helper(array('timediff', 'alphaid'));
 
         //刷新在线用户列表（埋点）
         $this->load->model('Model_online', 'online', TRUE);
