@@ -33,7 +33,6 @@ class reset extends CI_Controller {
 
         $email = $this->encryption->decrypt($this->input->post('token'));
 
-        //验证邮箱是否存在
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
@@ -43,6 +42,19 @@ class reset extends CI_Controller {
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
+                //更改记录状态
+                $api = $this->curl->get($system['api_host'].'/user/reset?email='.$email.'&forgot=0');
+                if ($api['httpcode'] == 200) {
+                    $output = json_decode($api['output'], true);
+                    if (!$output['status']) {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':更改记录状态');
+                        exit(json_encode(array('status' => false, 'error' => '更改记录状态')));
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':验证邮箱API异常.HTTP_CODE['.$api['httpcode'].']');
+                    exit(json_encode(array('status' => false, 'error' => '更改数据库状态API异常.HTTP_CODE['.$api['httpcode'].']')));
+                }
+                
                 exit(json_encode(array('status' => true, 'message' => '修改成功，请登录验证')));
             } else {
                 exit(json_encode(array('status' => false, 'error' => '修改失败，可能是你的Token造成的')));

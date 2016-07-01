@@ -6,7 +6,7 @@
       <div class="col-md-3">
       </div><!-- col-sm-7 -->
       <div class="col-md-6">
-      <form method="post" action="/forgot/send">
+      <form method="post" action="/forgot/send" id="form">
         <h4 class="nomargin">发送重置密码邮件</h4>
         <input name="email" id="email" type="text" class="form-control email" placeholder="邮件" />
         <button name="button" id="button" type="button" class="btn btn-success btn-block">发送</button>
@@ -30,8 +30,9 @@
       dataType: "JSON",
       success: function(data){
         if (data.status) {
-          alert(data.message);
-          location.href = window.location.href;
+          var url = $("#email").val();
+          url=url.substring(url.indexOf("@")+1,100);
+          $("#form").html('<h4 class="nomargin">'+data.message+', <a href="http://mail.'+url+'">请打开邮箱查看</h4>');
         } else {
           $('#button').text('发送');
           $('#button').removeAttr("disabled"); 
@@ -48,7 +49,7 @@
   }
 
   $(document).ready(function(){
-
+    
     //提交按钮触发
     $("#button").click(function(){
       forgot();
