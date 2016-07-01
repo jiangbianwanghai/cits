@@ -20,7 +20,7 @@ class Signin extends CI_Controller {
         $this->load->library('form_validation');
         
 
-        $this->form_validation->set_rules('username', '用户名', 'trim|required',
+        $this->form_validation->set_rules('account', '用户名', 'trim|required',
             array('required' => '%s 不能为空')
         );
         $this->form_validation->set_rules('password', '密码', 'trim|required',
@@ -35,7 +35,7 @@ class Signin extends CI_Controller {
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
-        $api = $this->curl->get($system['api_host'].'/user/signin_check?username='.$this->input->post('username').'&password='.$this->input->post('password'));
+        $api = $this->curl->get($system['api_host'].'/user/signin_check?account='.$this->input->post('account').'&password='.$this->input->post('password'));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {

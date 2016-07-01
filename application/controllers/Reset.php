@@ -43,7 +43,7 @@ class reset extends CI_Controller {
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
-                exit(json_encode(array('status' => true, 'error' => '修改成功，请登录验证')));
+                exit(json_encode(array('status' => true, 'message' => '修改成功，请登录验证')));
             } else {
                 exit(json_encode(array('status' => false, 'error' => '修改失败，可能是你的Token造成的')));
             }
