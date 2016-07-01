@@ -6,10 +6,11 @@
       <div class="col-md-3">
       </div><!-- col-sm-7 -->
       <div class="col-md-6">
-      <form method="post" action="/forgot/send">
-        <h4 class="nomargin">发送重置密码邮件</h4>
-        <input name="email" id="email" type="text" class="form-control email" placeholder="邮件" />
-        <button name="button" id="button" type="button" class="btn btn-success btn-block">发送</button>
+      <form method="post" action="/reset/send">
+        <h4 class="nomargin">重设密码</h4>
+        <input name="password" id="password" type="password" class="form-control pword" placeholder="请输入你的新密码" />
+        <input type="hidden" id="token" name="token" value="<?php echo $token;?>" />
+        <button name="button" id="button" type="button" class="btn btn-success btn-block">提交</button>
       </form>
       </div><!-- col-sm-5 -->
     </div><!-- row -->
@@ -18,22 +19,20 @@
 <?php include('common_js.php');?>
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
 <script type="text/javascript">
-
-  //验证登录函数
-  function forgot() {
-    $('#button').text('发送中...');
+  function reset() {
+    $('#button').text('提交中...');
     $("#button").attr("disabled", true);
     $.ajax({
       type: "POST",
-      url: "/forgot/send",
-      data:{'email':$("#email").val()},
+      url: "/reset/send",
+      data:{'password':$("#password").val(), 'token':$("#token").val()},
       dataType: "JSON",
       success: function(data){
         if (data.status) {
           alert(data.message);
-          location.href = window.location.href;
+          location.href = '/signin';
         } else {
-          $('#button').text('发送');
+          $('#button').text('提交');
           $('#button').removeAttr("disabled"); 
           jQuery.gritter.add({
             title: '提醒',
@@ -51,7 +50,7 @@
 
     //提交按钮触发
     $("#button").click(function(){
-      forgot();
+      reset();
       return false;
     });
 
@@ -61,7 +60,7 @@
     $inp.keypress(function (e) {
       var key = e.which; //e.which是按键的值 
       if (key == 13) { 
-        forgot();
+        reset();
         return false;
       } 
     }); 

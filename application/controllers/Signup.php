@@ -60,7 +60,7 @@ class Signup extends CI_Controller {
         //唯一性验证
         //邮箱
         $this->load->library('curl', array('token'=>$system['access_token']));
-        $api = $this->curl->get($system['api_host'].'/user/check_email?email='.$this->input->post('email').'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/user/check_email?email='.$this->input->post('email'));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
@@ -72,7 +72,7 @@ class Signup extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
         //用户名
-        $api = $this->curl->get($system['api_host'].'/user/check_username?username='.$this->input->post('username').'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/user/check_username?username='.$this->input->post('username'));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
@@ -87,8 +87,7 @@ class Signup extends CI_Controller {
         //写入数据
         $Post_data['email'] = $this->input->post('email');
         $Post_data['username'] = $this->input->post('username');
-        $Post_data['password'] = md5($this->input->post('password'));
-        $Post_data['access_token'] = $system['access_token'];
+        $Post_data['password'] = $this->input->post('password');
         $api = $this->curl->post($system['api_host'].'/user/write', $Post_data);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);

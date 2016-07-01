@@ -12,69 +12,46 @@ class forgot extends CI_Controller {
     }
 
     public function send() {
-        
-    }
-
-    /**
-     * 登录信息验证
-     */
-    public function check() {
-
-        //输入合法性验证
         $this->load->library('form_validation');
-        
-
-        $this->form_validation->set_rules('username', '用户名', 'trim|required',
-            array('required' => '%s 不能为空')
-        );
-        $this->form_validation->set_rules('password', '密码', 'trim|required',
-            array('required' => '%s 不能为空')
+        $this->form_validation->set_rules('email', '邮箱', 'trim|required|valid_email',
+            array(
+                'required' => '%s 不能为空',
+                'valid_email' => '%s 格式错误'
+            )
         );
         if ($this->form_validation->run() == FALSE) {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.validation_errors());
             exit(json_encode(array('status' => false, 'error' => validation_errors())));
         }
 
-        //存在性验证
+        //验证邮箱是否存在
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
-        $api = $this->curl->get($system['api_host'].'/user/signin_check?username='.$this->input->post('username').'&password='.md5($this->input->post('password')));
+        $api = $this->curl->get($system['api_host'].'/user/check_email?email='.$this->input->post('email'));
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
-            if (!$output['status']) {
-                exit(json_encode(array('status' => false, 'error' => $output['error'])));
-            } else {
-                //这是Cookie
-                $auth = serialize(array('user_id' => $output['content']['uid'], 'user_name' => $output['content']['username'], 'real_name' => $output['content']['realname']));
-                $this->input->set_cookie('cits_auth', $this->encryption->encrypt($auth), 86400*5);
-                $this->input->set_cookie('cits_user_online', time(), 86400);
-
-                //更新在线时间戳
-                $this->load->model('Model_online', 'online', TRUE);
-                $this->online->update_by_unique(array('uid' => $output['content']['uid'], 'act_time' => time()));
-
-                //从个人信息中获取
-                $api = $this->curl->get($system['api_host'].'/user/row?uid='.$output['content']['uid']);
-                if ($api['httpcode'] == 200) {
-                    $output = json_decode($api['output'], true);
-                    if ($output['status']) {
-                        if ($output['content']['star_project']) {
-                            $this->input->set_cookie('cits_star_project', $this->encryption->encrypt($output['content']['star_project']), 86400*5);
-                        }
-                    } else {
-                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
-                    }
-                } else {
-                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':获取关注项目API异常.HTTP_CODE['.$api['httpcode'].']');
-                    exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
-                }
-                
-                exit(json_encode(array('status' => true, 'message' => '验证通过')));
+            if ($output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':系统不存在此邮箱');
+                exit(json_encode(array('status' => false, 'error' => '系统不存在此邮箱')));
             }
         } else {
-            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':验证用户登录信息API异常.HTTP_CODE['.$api['httpcode'].']');
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':验证邮箱API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
+
+        //发送重置邮件
+        $subject = '重置我的密码 - CITS';
+        $message = '重置链接：<a target="_blank" href="http://cits.gongchang.net/reset?token='.urlencode($this->encryption->encrypt($this->input->post('email'))).'">http://cits.gongchang.net/reset?token='.urlencode($this->encryption->encrypt($this->input->post('email'))).'</a>';
+        $this->load->library('email');
+        $this->config->load('extension', TRUE);
+        $email = $this->config->item('email', 'extension');
+        $this->email->initialize($email);
+        $this->email->from($email['smtp_user']);
+        $this->email->to($this->input->post('email'));
+        $this->email->subject($subject);
+        $this->email->message($message);
+        $this->email->send();
+        exit(json_encode(array('status' => true, 'message' => '重置邮件已经发送')));
     }
 }
