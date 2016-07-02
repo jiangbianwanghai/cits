@@ -446,6 +446,20 @@ class Issue extends CI_Controller {
 
         $data['PAGE_TITLE'] = $data['issue_profile']['issue_name'].' - 任务详情';
 
+        $is_read = $this->input->get('is_read', TRUE);
+        if ($is_read == 'yes') {
+            $Post_data['id'] = $id;
+            $api = $this->curl->post($system['api_host'].'/notify/change_read', $Post_data);
+            if ($api['httpcode'] == 200) {
+                $output = json_decode($api['output'], true);
+                if (!$output['status']) {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':标记提醒已读异常-'.$output['error']);
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':标记提醒已读API异常.HTTP_CODE['.$api['httpcode'].']');
+            }
+        }
+
         //读取相关提测记录
         $data['commit'] = array('total' => 0, 'data' => array());
         $api = $this->curl->get($system['api_host'].'/commit/get_rows_by_issue?id='.$id);

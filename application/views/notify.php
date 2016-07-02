@@ -69,6 +69,7 @@
                   </tbody>
                 </table>
               </div><!-- table-responsive -->
+              <?php echo $pages; ?>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-9 -->

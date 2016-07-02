@@ -72,7 +72,7 @@ class Dashboard extends CI_Controller {
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
-        $api = $this->curl->get($system['api_host'].'/notify/get_rows?uid='.UID.'&access_token='.$system['access_token']);
+        $api = $this->curl->get($system['api_host'].'/notify/get_rows?uid='.UID.'&is_read=n&offset=0&limit=5');
         if ($api['httpcode'] == 200) {
             $users = array();
             if (file_exists(APPPATH.'/cache/user.cache.php')) {
@@ -87,13 +87,28 @@ class Dashboard extends CI_Controller {
                     $output['content']['data'][$key]['log_subject'] = $value['log']['subject'];
                     
                     if ($value['log']['target_type'] == '3') {
-                        $url = 'issue/view/'.alphaid($value['log']['target']).'?is_read=yes';
+                        $url = 'issue/view/'.alphaid($value['log']['target']);
                         $output['content']['data'][$key]['log_target_type'] = '任务';
                     }
                     $output['content']['data'][$key]['log_url'] = $url;
                     $output['content']['data'][$key]['log_target'] = $value['log']['target'];
                     $output['content']['data'][$key]['log_sender_username'] = $users[$value['log']['sender']]['username'];
                     $output['content']['data'][$key]['log_sender_realname'] = $users[$value['log']['sender']]['realname'];
+                    $subject = '给你';
+                    $subject = $value['log']['action'].'了';
+                    if ($value['log']['target_type'] == '3') {
+                        $subject .= '任务';
+                        $url = '/issue/view/'.alphaid($value['log']['target']);
+                    }
+                    if ($value['log']['action'] == '评论') {
+                        $url .= '#comment-'.alphaid($value['log']['content']);
+                    }
+                    $end = '';
+                    if ($value['log']['action'] == '变更') {
+                        $end = ' 的工作流状态为 '.$value['log']['content'];
+                    }
+                    $output['content']['data'][$key]['subject'] = $subject.' #<a href="/notify/read?id='.alphaid($value['id']).'&token='.urlencode($this->encryption->encrypt($url)).'">'.$value['log']['subject'].'</a>'.$end;
+
                 }
                 $output['content']['datas'] = $output['content']['data'];
                 unset($output['content']['data']);
