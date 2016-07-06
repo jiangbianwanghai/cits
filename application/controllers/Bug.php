@@ -39,7 +39,13 @@ class Bug extends CI_Controller {
 
         $data['PAGE_TITLE'] = 'bug列表';
 
-        $folder = $data['folder'] = $this->uri->segment(3, 'all');
+        $folder = $this->uri->segment(3, 'all');
+        if (in_array($folder, array('all', 'to_me', 'from_me'))) {
+            $folder = $this->uri->segment(3, 'all');
+        } else {
+            $folder = 'all';
+        }
+        $data['folder'] = $folder;
         $state = $data['state'] = $this->uri->segment(4, 'all');
         $status = $data['status'] = $this->uri->segment(5, 'all');
         $offset = $data['offset'] = $this->uri->segment(6, 0);
@@ -656,8 +662,6 @@ class Bug extends CI_Controller {
         $this->load->library('curl', array('token'=>$system['access_token']));
         $data['level'] = $this->config->item('level', 'extension');
         $data['bugflow'] = $this->config->item('bugflow', 'extension');
-        $data['bugflowfilter'] = $this->config->item('bugflowfilter', 'extension');
-        $data['bugstatusfilter'] = $this->config->item('bugstatusfilter', 'extension');
         $data['bugstatus'] = $this->config->item('bugstatus', 'extension');
         $config = $this->config->item('pages', 'extension');
         

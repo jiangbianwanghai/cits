@@ -37,9 +37,113 @@ class Issue extends CI_Controller {
     {
         $this->__init();
 
-        $data['PAGE_TITLE'] = '计划列表';
+        $data['PAGE_TITLE'] = 'bug列表';
 
-        
+        $this->load->helper('alphaid');
+
+        $folder = $this->uri->segment(3, 'all');
+        if (in_array($folder, array('all', 'to_me', 'from_me'))) {
+            $folder = $this->uri->segment(3, 'all');
+        } else {
+            $folder = 'all';
+        }
+        $data['folder'] = $folder;
+        $data['planid'] = $planid = $this->uri->segment(4, 'all');
+        $data['flow'] = $this->uri->segment(5, 'all');
+        $data['type'] = $this->uri->segment(6, 'all');
+        $data['status'] = $this->uri->segment(7, 'all');
+        $offset = $this->uri->segment(8, 0);
+
+        //读取系统配置信息
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $data['level'] = $this->config->item('level', 'extension');
+        $data['workflow'] = $this->config->item('workflow', 'extension');
+        $data['workflowfilter'] = $this->config->item('workflowfilter', 'extension');
+        $data['issuestatusfilter'] = $this->config->item('issuestatusfilter', 'extension');
+        $data['issuestatus'] = $this->config->item('issuestatus', 'extension');
+        $data['tasktype'] = $this->config->item('tasktype', 'extension');
+        $data['tasktypefilter'] = $this->config->item('tasktypefilter', 'extension');
+        $config = $this->config->item('pages', 'extension');
+
+        //读取计划list
+        $data['planarr'] = array();
+        $api = $this->curl->get($system['api_host'].'/plan/rows_by_projectid?id='.$this->_projectid);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                foreach ($output['content']['data'] as $key => $value) {
+                    $data['planarr'][alphaid($value['id'])] = $value;
+                }
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取计划API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        }
+
+        //根据任务ID获取任务信息
+        $filter = 'project_id,'.$this->_projectid;
+        if ($data['flow'] && $data['flow'] != 'all') {
+            $filter .= '|workflow,'.$data['workflowfilter'][$data['flow']]['id'];
+        }
+        if ($planid && $planid != 'all') {
+            $planid = alphaid($planid, 1);
+            $filter .= '|plan_id,'.$planid;
+        }
+        if ($data['status'] && $data['status'] != 'all') {
+            $filter .= '|status,'.$data['issuestatusfilter'][$data['status']]['id'];
+        }
+        if ($data['type'] && $data['type'] != 'all') {
+            $filter .= '|type,'.$data['tasktypefilter'][$data['type']];
+        }
+        if ($folder == 'to_me') {
+            $filter .= '|accept_user,'.UID;
+        }
+        if ($folder == 'from_me') {
+            $filter .= '|add_user,'.UID;
+        }
+
+        $ids = array();
+        $data['rows'] = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/issue/rows?offset='.$offset.'&limit='.$config['per_page'].'&filter='.$filter);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $data['rows'] = $output['content'];
+                foreach ($output['content']['data'] as $key => $value) {
+                    $ids[] = $value['id'];
+                }
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        }
+
+        //读取关注数据
+        $data['star'] = array();
+        $api = $this->curl->get($system['api_host'].'/star/get_rows_by_type?uid='.UID.'&type=1');
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                foreach ($output['content']['data'] as $key => $value) {
+                    $data['star'][] = $value['star_id'];
+                }
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':关注API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('关注API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        }
+
+        //分页
+        $this->load->library('pagination');
+        $config['total_rows'] = $data['rows']['total'];
+        $config['cur_page'] = $offset;
+        $config['base_url'] = '/issue/index/'.$folder.'/'.$data['planid'].'/'.$data['flow'].'/'.$data['type'].'/'.$data['status'];
+        $this->pagination->initialize($config);
+        $data['pages'] = $this->pagination->create_links();
+        $data['offset'] = $offset;
+        $data['per_page'] = $config['per_page'];
 
         //刷新在线用户列表（埋点）
         $this->load->model('Model_online', 'online', TRUE);
@@ -47,7 +151,7 @@ class Issue extends CI_Controller {
         $onlineUsers = $this->online->users();
         $data['online_users'] = $onlineUsers;
 
-        $this->load->view('plan', $data);
+        $this->load->view('issue', $data);
     }
 
     /**
@@ -916,5 +1020,129 @@ class Issue extends CI_Controller {
         }
 
         echo 1;
+    }
+
+    /**
+     * 关注BUG
+     */
+    public function star_add()
+    {
+        $this->__init();
+
+        //解析url传值
+        $this->load->helper('alphaid');
+        $id = $this->uri->segment(3, 0);
+        $id = alphaid($id, 1);
+
+        //写入数据
+        $Post_data['add_user'] = UID;
+        $Post_data['star_id'] = $id;
+        $Post_data['star_type'] = 1;
+
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->post($system['api_host'].'/star/write', $Post_data);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                exit(json_encode(array('status' => true, 'message' => '关注成功')));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':关注失败');
+                exit(json_encode(array('status' => false, 'error' => '关注失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+    }
+
+    /**
+     * 取消关注bug
+     */
+    public function star_del()
+    {
+        $this->__init();
+
+        //解析url传值
+        $this->load->helper('alphaid');
+        $id = $this->uri->segment(3, 0);
+        $id = alphaid($id, 1);
+
+        //写入数据
+        $Post_data['add_user'] = UID;
+        $Post_data['star_id'] = $id;
+        $Post_data['star_type'] = 1;
+
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $api = $this->curl->post($system['api_host'].'/star/del', $Post_data);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                exit(json_encode(array('status' => true, 'message' => '取消关注成功')));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':取消关注失败');
+                exit(json_encode(array('status' => false, 'error' => '取消关注失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+    }
+
+    /**
+     * 关注bug列表
+     */
+    public function star()
+    {
+        $this->__init();
+
+        $data['PAGE_TITLE'] = '关注的bug列表';
+        $data['folder'] = 'all';
+        $offset = $data['offset'] = $this->uri->segment(3, 0);
+
+        //读取系统配置信息
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $data['level'] = $this->config->item('level', 'extension');
+        $data['workflow'] = $this->config->item('workflow', 'extension');
+        $data['issuestatus'] = $this->config->item('issuestatus', 'extension');
+        $data['tasktype'] = $this->config->item('tasktype', 'extension');
+        $config = $this->config->item('pages', 'extension');
+        
+        $data['rows'] = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/issue/star?uid='.UID.'&offset='.$offset.'&limit='.$config['per_page']);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $data['rows'] = $output['content'];
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        }
+
+        //分页
+        $this->load->library('pagination');
+        $config['total_rows'] = $data['rows']['total'];
+        $config['cur_page'] = $offset;
+        $config['base_url'] = '/bug/star/';
+        $this->pagination->initialize($config);
+        $data['pages'] = $this->pagination->create_links();
+        $data['offset'] = $offset;
+        $data['per_page'] = $config['per_page'];
+
+        //刷新在线用户列表（埋点）
+        $this->load->model('Model_online', 'online', TRUE);
+        $this->online->refresh(UID);
+        $onlineUsers = $this->online->users();
+        $data['online_users'] = $onlineUsers;
+
+        $this->load->helper('alphaid');
+
+        $this->load->view('issue', $data);
     }
 }

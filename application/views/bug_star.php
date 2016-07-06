@@ -5,13 +5,13 @@
   <div class="mainpanel">
     <?php include('common_headerbar.php');?>
     <div class="pageheader">
-      <h2><i class="fa fa-bug"></i> Bug管理 <span>当前项目的Bug列表</span></h2>
+      <h2><i class="fa fa-bug"></i> Bug管理 <span>关注的Bug列表</span></h2>
       <div class="breadcrumb-wrapper">
         <span class="label">你的位置:</span>
         <ol class="breadcrumb">
           <li><a href="/">CITS</a></li>
           <li><a href="/bug">Bug管理</a></li>
-          <li class="active">当前项目的Bug列表</li>
+          <li class="active">关注的Bug列表</li>
         </ol>
       </div>
     </div>
@@ -19,7 +19,7 @@
     <div class="row">
       <div class="col-sm-3 col-lg-2">
         <ul class="nav nav-pills nav-stacked nav-email">
-          <li<?php if ($this->uri->segment(1, 'index') == 'bug' && $this->uri->segment(2, 'index') == 'index' && $this->uri->segment(3, 'all') == 'all') {?> class="active"<?php } ?>><a href="/bug"><i class="fa fa-bug"></i> Bug列表</a></li>
+          <li<?php if ($this->uri->segment(1, 'index') == 'bug' && $this->uri->segment(2, 'index') == 'index' && $this->uri->segment(3, 'all') == 'all') {?> class="active"<?php } ?>><a href="/bug"><i class="glyphicon glyphicon-inbox"></i> Bug列表</a></li>
           <li<?php if ($folder == 'to_me') { ?> class="active"<?php } ?>><a href="/bug/index/to_me"><i class="glyphicon glyphicon-folder-<?php echo $folder == 'to_me' ? 'open' : 'close'; ?>"></i> 我负责的</a></li>
           <li<?php if ($folder == 'from_me') { ?> class="active"<?php } ?>><a href="/bug/index/from_me"><i class="glyphicon glyphicon-folder-<?php echo $folder == 'from_me' ? 'open' : 'close'; ?>"></i> 我创建的</a></li>
         </ul>
@@ -144,7 +144,6 @@
         </div><!-- panel -->   
       </div><!-- col-sm-9 -->
     </div><!-- row -->
-    <p class="text-right"><small>页面执行时间 <em>{elapsed_time}</em> 秒 使用内存 {memory_usage}</small></p>
   </div><!-- contentpanel -->
 </div><!-- mainpanel -->
 <?php include('common_tab.php');?>

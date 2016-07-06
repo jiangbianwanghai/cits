@@ -5,13 +5,13 @@
   <div class="mainpanel">
     <?php include('common_headerbar.php');?>
     <div class="pageheader">
-      <h2><i class="fa fa-bug"></i> Bug管理 <span>当前项目的Bug列表</span></h2>
+      <h2><i class="fa fa-tasks"></i> 任务管理 <span>当前项目的任务列表</span></h2>
       <div class="breadcrumb-wrapper">
         <span class="label">你的位置:</span>
         <ol class="breadcrumb">
           <li><a href="/">CITS</a></li>
-          <li><a href="/bug">Bug管理</a></li>
-          <li class="active">当前项目的Bug列表</li>
+          <li><a href="/issue">任务管理</a></li>
+          <li class="active">当前项目的任务列表</li>
         </ol>
       </div>
     </div>
@@ -19,14 +19,14 @@
     <div class="row">
       <div class="col-sm-3 col-lg-2">
         <ul class="nav nav-pills nav-stacked nav-email">
-          <li<?php if ($this->uri->segment(1, 'index') == 'bug' && $this->uri->segment(2, 'index') == 'index' && $this->uri->segment(3, 'all') == 'all') {?> class="active"<?php } ?>><a href="/bug"><i class="fa fa-bug"></i> Bug列表</a></li>
-          <li<?php if ($folder == 'to_me') { ?> class="active"<?php } ?>><a href="/bug/index/to_me"><i class="glyphicon glyphicon-folder-<?php echo $folder == 'to_me' ? 'open' : 'close'; ?>"></i> 我负责的</a></li>
-          <li<?php if ($folder == 'from_me') { ?> class="active"<?php } ?>><a href="/bug/index/from_me"><i class="glyphicon glyphicon-folder-<?php echo $folder == 'from_me' ? 'open' : 'close'; ?>"></i> 我创建的</a></li>
+          <li<?php if ($this->uri->segment(1, 'index') == 'issue' && $this->uri->segment(2, 'index') == 'index' && $this->uri->segment(3, 'all') == 'all') {?> class="active"<?php } ?>><a href="/issue"><i class="fa fa-tasks"></i> 任务列表</a></li>
+          <li<?php if ($folder == 'to_me') { ?> class="active"<?php } ?>><a href="/issue/index/to_me"><i class="glyphicon glyphicon-folder-<?php echo $folder == 'to_me' ? 'open' : 'close'; ?>"></i> 我负责的</a></li>
+          <li<?php if ($folder == 'from_me') { ?> class="active"<?php } ?>><a href="/issue/index/from_me"><i class="glyphicon glyphicon-folder-<?php echo $folder == 'from_me' ? 'open' : 'close'; ?>"></i> 我创建的</a></li>
         </ul>
         <div class="mb30"></div>
         <h5 class="subtitle">快捷方式</h5>
         <ul class="nav nav-pills nav-stacked nav-email mb20">
-          <li<?php if ($this->uri->segment(2, '') == 'star') {?> class="active"<?php } ?>><a href="/bug/star"><i class="glyphicon glyphicon-star"></i> 星标</a></li>
+          <li<?php if ($this->uri->segment(2, '') == 'star') {?> class="active"<?php } ?>><a href="/issue/star"><i class="glyphicon glyphicon-star"></i> 星标</a></li>
         </ul>
       </div><!-- col-sm-3 -->
       <div class="col-sm-9 col-lg-10">
@@ -36,36 +36,66 @@
             <div class="pull-right">
               <div class="btn-group">
                 <div class="btn-group nomargin">
-                  <button data-toggle="dropdown" class="btn btn-sm btn-white dropdown-toggle tooltips" type="button" title="根据处理状态筛选">
-                    <i class="glyphicon glyphicon-folder-<?php if ($state == 'all') { echo 'close'; } else { echo 'open'; } ?> mr5"></i> <?php if ($state == 'all') { echo '处理状态筛选'; } else { echo $bugflowfilter[$state]['name']; } ?>
+                  <button data-toggle="dropdown" class="btn btn-sm btn-white dropdown-toggle tooltips" type="button" title="请先选择绩效圈">
+                    <i class="glyphicon glyphicon-folder-<?php if (isset($planarr[$planid])) { echo 'open'; } else { echo 'close'; }?> mr5"></i> <?php if (isset($planarr[$planid])) { echo $planarr[$planid]['plan_name']; } else { echo '计划筛选'; }?>
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
-                    <?php if ($state != 'all') {?>
-                    <li><a href="/bug/index/<?php echo $folder;?>/all/<?php echo $status; ?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
+                    <?php if (isset($planarr[$planid])) {?>
+                    <li><a href="/issue/index/<?php echo $folder;?>/all/<?php echo $flow;?>/<?php echo $type;?>/<?php echo $status;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
                     <?php } ?>
                     <?php 
-                    foreach ($bugflow as $key => $value) {
-                      if ($state != $value['en_name']) {
-                        echo '<li><a href="/bug/index/'.$folder.'/'.$value['en_name'].'/'.$status.'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
+                    foreach ($planarr as $key => $value) {
+                      if ($planid != $value['id'] || !$planid) {
+                    ?>
+                    <li><a href="/issue/index/<?php echo $folder;?>/<?php echo $key;?>/<?php echo $flow;?>/<?php echo $type;?>/<?php echo $status;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> <?php echo $value['plan_name'];?></a></li>
+                    <?php
                       }
-                    }
+                    } 
                     ?>
                   </ul>
                 </div>
                 <div class="btn-group nomargin">
+                  <button data-toggle="dropdown" class="btn btn-sm btn-white dropdown-toggle tooltips" type="button" title="根据工作流筛选" style="text-transform:uppercase;">
+                    <i class="glyphicon glyphicon-folder-<?php if (isset($workflowfilter[$flow])) { echo 'open'; } else { echo 'close'; }?> mr5"></i> <?php if (isset($workflowfilter[$flow])) { echo $workflowfilter[$flow]['name']; } else { echo '工作流筛选'; }?>
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <?php if (isset($workflowfilter[$flow])) {?>
+                    <li><a href="/issue/index/<?php echo $folder;?>/<?php echo $planid;?>/all/<?php echo $type;?>/<?php echo $status;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
+                    <?php } ?>
+                    <?php foreach ($workflow as $key => $value) {?>
+                    <?php if ($flow != $value['en_name'] || !$flow) {?><li><a href="/issue/index/<?php echo $folder;?>/<?php echo $planid;?>/<?php echo $value['en_name'];?>/<?php echo $type;?>/<?php echo $status;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> <?php echo $value['name'];?></a></li><?php } ?>
+                    <?php } ?>
+                  </ul>
+                </div>
+                <div class="btn-group nomargin">
+                  <button data-toggle="dropdown" class="btn btn-sm btn-white dropdown-toggle tooltips" type="button" title="根据类型筛选" style="text-transform:uppercase;">
+                    <i class="glyphicon glyphicon-folder-<?php if (isset($tasktypefilter[$type])) { echo 'open'; } else { echo 'close'; }?> mr5"></i> <?php if (isset($tasktypefilter[$type])) { echo $type; } else { echo '类型筛选'; }?>
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <?php if (isset($tasktypefilter[$type])) {?>
+                    <li><a href="/issue/index/<?php echo $folder;?>/<?php echo $planid;?>/<?php echo $flow;?>/all/<?php echo $status;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
+                    <?php } ?>
+                    <?php foreach ($tasktype as $key => $value) {?>
+                    <?php if ($type != $value || !$type) {?><li><a href="/issue/index/<?php echo $folder;?>/<?php echo $planid;?>/<?php echo $flow;?>/<?php echo $value;?>/<?php echo $status;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> <?php echo $value;?></a></li><?php } ?>
+                    <?php } ?>
+                  </ul>
+                </div>
+                <div class="btn-group nomargin">
                   <button data-toggle="dropdown" class="btn btn-sm btn-white dropdown-toggle tooltips" type="button" title="根据信息状态筛选">
-                    <i class="glyphicon glyphicon-folder-<?php if ($status == 'all') { echo 'close'; } else { echo 'open'; } ?> mr5"></i> <?php if ($status == 'all') { echo '信息状态筛选'; } else { echo $bugstatusfilter[$status]['name']; } ?>
+                    <i class="glyphicon glyphicon-folder-<?php if ($status == 'all') { echo 'close'; } else { echo 'open'; } ?> mr5"></i> <?php if ($status == 'all') { echo '信息状态筛选'; } else { echo $issuestatusfilter[$status]['name']; } ?>
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
                     <?php if ($status != 'all') {?>
-                    <li><a href="/bug/index/<?php echo $folder;?>/<?php echo $state;?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
+                    <li><a href="/issue/index/<?php echo $folder.'/'.$planid.'/'.$flow.'/'.$type; ?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
                     <?php } ?>
                     <?php 
-                    foreach ($bugstatus as $key => $value) {
+                    foreach ($issuestatus as $key => $value) {
                       if ($status != $value['en_name']) {
-                        echo '<li><a href="/bug/index/'.$folder.'/'.$state.'/'.$value['en_name'].'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
+                        echo '<li><a href="/issue/index/'.$folder.'/'.$planid.'/'.$flow.'/'.$type.'/'.$value['en_name'].'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
                       }
                     }
                     ?>
@@ -74,7 +104,7 @@
               </div>
             </div><!-- pull-right -->
             <?php } ?>
-            <h5 class="subtitle mb5">Bug列表</h5>
+            <h5 class="subtitle mb5">任务列表</h5>
             <?php if (($rows['total']-$offset) < $per_page) { $per_page_end = $rows['total']-$offset; } else { $per_page_end = $per_page; }?>
             <p class="text-muted">查询结果：<?php echo ($offset+1).' - '.($per_page_end+$offset).' of '.$rows['total'];?></p>
             <div class="table-responsive">
@@ -93,11 +123,11 @@
                           } else {
                             $day = date('Y-m-d', $value['add_time']).' 星期'.$weekarray[date("w",$value['add_time'])];
                           }
-                          echo '<tr><td colspan="8"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
+                          echo '<tr><td colspan="10"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
                         }
                         $timeGroup[$timeDay] = 1;
                   ?>
-                  <tr class="unread">
+                  <tr class="unread" id="item-<?php echo alphaid($value['id']);?>">
                     <td>
                       <div class="ckbox ckbox-success">
                           <input type="checkbox" id="checkbox<?php echo alphaid($value['id']);?>">
@@ -105,7 +135,7 @@
                       </div>
                     </td>
                     <td>
-                      <a href="javascript:;" bugid="<?php echo alphaid($value['id']);?>" class="star<?php if ($this->uri->segment(2, '') == 'star') { echo ' star-checked'; } else { if (in_array($value['id'], $star)) echo ' star-checked'; }?>"><i class="glyphicon glyphicon-star"></i></a>
+                      <a href="javascript:;" data-id="<?php echo alphaid($value['id']);?>" class="star<?php if ($this->uri->segment(2, '') == 'star') { echo ' star-checked'; } else { if (in_array($value['id'], $star)) echo ' star-checked'; }?>"><i class="glyphicon glyphicon-star"></i></a>
                     </td>
                     <td width="50px">
                       <a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left" target="_blank">
@@ -118,13 +148,16 @@
                       </a>
                     </td>
                     <td width="50px">
-                      <?php echo '<span class="label label-'.$bugstatus[$value['status']]['span_color'].'">'.$bugstatus[$value['status']]['name'].'</span>'; ?>
+                      <?php echo '<span class="label label-'.$issuestatus[$value['status']]['span_color'].'">'.$issuestatus[$value['status']]['name'].'</span>'; ?>
                     </td>
                     <td width="70px">
-                      <?php echo '<span class="label label-'.$bugflow[$value['state']]['span_color'].'">'.$bugflow[$value['state']]['name'].'</span>'; ?>
+                      <?php echo '<span class="label label-'.$workflow[$value['workflow']]['span_color'].'">'.$workflow[$value['workflow']]['name'].'</span>'; ?>
                     </td>
+                    <td align="center" width="30px">
+                        <?php if ($value['type'] == 2) {?><i class="fa fa-bug tooltips" data-toggle="tooltip" title="BUG"></i><?php } ?><?php if ($value['type'] == 1) {?><i class="fa fa-magic tooltips" data-toggle="tooltip" title="TASK"></i><?php } ?>
+                      </td>
                     <td>
-                      <?php if ($value['level']) {?><?php echo "<strong style='color:#ff0000;' title='".$level[$value['level']]['alt']."'>".$level[$value['level']]['name']."</strong> ";?><?php } ?> <a href="/bug/view/<?php echo alphaid($value['id']);?>"><?php echo $value['subject'];?></a>
+                      <?php if ($value['level']) {?><?php echo "<strong style='color:#ff0000;' title='".$level[$value['level']]['alt']."'>".$level[$value['level']]['name']."</strong> ";?><?php } ?> <a href="/issue/view/<?php echo alphaid($value['id']);?>"><?php echo $value['issue_name'];?></a>
                     </td>
                     <td><span class="media-meta pull-right"><?php echo date("Y/m/d H:i", $value['add_time'])?></span></td>
                   </tr>
@@ -174,11 +207,11 @@ jQuery(document).ready(function(){
   $('.star').click(function(){
       if(!jQuery(this).hasClass('star-checked')) {
           jQuery(this).addClass('star-checked');
-          var id = jQuery(this).attr('bugid');
+          var id = jQuery(this).attr('data-id');
           $.ajax({
             type: "GET",
             dataType: "JSON",
-            url: "/bug/star_add/"+id,
+            url: "/issue/star_add/"+id,
             success: function(data){
               if (data.status) {
                 jQuery.gritter.add({
@@ -201,11 +234,11 @@ jQuery(document).ready(function(){
           });
       } else {
         jQuery(this).removeClass('star-checked');
-        var id = jQuery(this).attr('bugid');
+        var id = jQuery(this).attr('data-id');
         $.ajax({
           type: "GET",
           dataType: "JSON",
-          url: "/bug/star_del/"+id,
+          url: "/issue/star_del/"+id,
           success: function(data){
             if (data.status) {
               jQuery.gritter.add({
