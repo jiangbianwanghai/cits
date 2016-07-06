@@ -143,7 +143,7 @@
                 <?php } else { ?>
                   <?php if (($issue_profile['workflow'] >=3 && $issue_profile['workflow'] <= 5) && $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == UID) {?>
                   <td style="text-align:center;" width="200px" id="td-wait">
-                    <a href="/bug/add/<?php echo $issueid;?>" class="label label-danger" target="_blank">反馈BUG</a> 
+                    <a href="/bug/add/<?php echo $issueid;?>" class="label label-danger">反馈BUG</a> 
                     <a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-primary waits">测试通过</a>
                   </td>
                   <?php } else {?>
@@ -384,15 +384,15 @@
                     <td width="30px"><i class="fa fa-bug tooltips" data-toggle="tooltip" title="Bug"></i></td>
                     <td width="50px">
                       <a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left" target="_blank">
-                        <div class="face"><img alt="" src="/static/avatar/<?php echo $users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="反馈人：<?php echo $users[$value['add_user']]['realname'];?>"></div>
+                        <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="反馈人：<?php echo $users[$value['add_user']]['realname'];?>"></div>
                       </a>
                     </td>
                     <td width="50px">
                       <a href="/conf/profile/<?php echo $value['accept_user'];?>" class="pull-left" target="_blank">
-                        <div class="face"><img alt="" src="/static/avatar/<?php echo $users[$value['accept_user']]['username']?>.jpg" align="absmiddle" title="受理人：<?php echo $users[$value['accept_user']]['realname'];?>"></div>
+                        <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['accept_user']]['username']?>.jpg" align="absmiddle" title="受理人：<?php echo $users[$value['accept_user']]['realname'];?>"></div>
                       </a>
                     </td>
-                    <td><?php if ($value['level']) { ?><?php echo "<strong style='color:#ff0000;'>".$level[$value['level']]['name']."</strong> ";?><?php } ?><a href="/bug/view/<?php echo $value['id'];?>"><?php echo $value['subject']?></a></td>
+                    <td><?php if ($value['level']) { ?><?php echo "<strong style='color:#ff0000;'>".$level[$value['level']]['name']."</strong> ";?><?php } ?><a href="/bug/view/<?php echo alphaid($value['id']);?>"><?php echo $value['subject']?></a></td>
                     
                     <td width="80px">
                       <?php if ($value['state'] === '0') {?>
@@ -765,7 +765,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-success',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -777,7 +776,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -836,7 +834,6 @@
               title: '提醒',
               text: data.message,
                 class_name: 'growl-success',
-                image: '/static/images/screen.png',
               sticky: false,
               time: ''
             });
@@ -848,7 +845,6 @@
               title: '提醒',
               text: data.message,
                 class_name: 'growl-danger',
-                image: '/static/images/screen.png',
               sticky: false,
               time: ''
             });

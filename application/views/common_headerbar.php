@@ -26,9 +26,9 @@ if (file_exists(APPPATH.'cache/user.cache.php')) {
         <ul class="dropdown-menu children">
           <?php
           if ($this->input->cookie('cits_star_project') && $project) {
-            $star = unserialize($this->encryption->decrypt($this->input->cookie('cits_star_project'))); //从Cookie中获取
+            $Project_star = unserialize($this->encryption->decrypt($this->input->cookie('cits_star_project'))); //从Cookie中获取
             $i = 1;
-            foreach ($star as $k => $v) {
+            foreach ($Project_star as $k => $v) {
               echo "<li><a href=\"javascript:;\" class=\"set-project\" projectid=\"".$project[$v]['sha']."\" projectname=\"".$project[$v]['project_name']."\">".$project[$v]['project_name']."</a></li>";
               if ($i >= 10) {
                 break;
