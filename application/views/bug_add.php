@@ -184,7 +184,7 @@ jQuery(document).ready(function(){
 
 </script>
 <script type="text/javascript">
-   $(function(){
+$(function(){
   toolbar = [ 'title', 'bold', 'italic', 'underline', 'strikethrough',
       'color', '|', 'ol', 'ul', 'blockquote', 'code', 'table', '|',
       'link', 'image', 'hr', '|', 'indent', 'outdent' ];
@@ -200,7 +200,7 @@ jQuery(document).ready(function(){
         leaveConfirm: '正在上传文件'
       }
   });
-   })
+})
 </script>
 
 </body>

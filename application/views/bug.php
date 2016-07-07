@@ -152,7 +152,6 @@
 <?php include('common_js.php');?>
 <script src="<?php echo STATIC_HOST; ?>/js/jquery.datatables.min.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/select2.min.js"></script>
-<script src="<?php echo STATIC_HOST; ?>/js/select2.min.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>
 <script>

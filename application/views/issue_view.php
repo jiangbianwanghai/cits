@@ -475,7 +475,7 @@
         </div><!-- tab-pane -->
           
         <div id="added" class="tab-pane">
-            loading...
+            <div align="center"><img src="<?php echo STATIC_HOST; ?>/images/loaders/loader19.gif" /></div>
         </div><!-- tab-pane -->
       </div><!-- tab-content -->
     </div><!-- panel -->
@@ -1022,6 +1022,8 @@
                 log_list += '<tr class="unread"><td></td><td><a href="" class="star"><i class="fa fa-dot-circle-o"></i></a></td><td><div class="media"><a href="#" class="face"><img alt="" src="'+data.comment[p].avatar+'"></a><div class="media-body"><span class="media-meta pull-right">'+data.comment[p].friendtime+'前</span><h4 class="text-primary">'+data.comment[p].realname+'</h4><small class="text-muted"></small><p class="email-summary">'+data.comment[p].content+'</p></div></div></td></tr>';
               }
               $("#added").html('<div class="table-responsive"><table class="table table-email"><tbody>'+log_list+'</tbody></table></div>');
+            } else {
+              $("#added").html('<div align="center">暂无操作日志</div>');
             }
           }
         });
