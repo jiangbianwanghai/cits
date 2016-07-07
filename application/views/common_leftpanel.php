@@ -5,11 +5,11 @@
     <h5 class="sidebartitle">快捷导航</h5>
     <ul class="nav nav-pills nav-stacked nav-bracket">
       <li<?php if ($this->uri->segment(1, 'dashboard') == 'dashboard') echo ' class="active"';?>><a href="/"><i class="fa fa-home"></i> <span>我的面板</span></a></li>
+      <li<?php if ($this->uri->segment(1, '') == 'analytics') echo ' class="active"';?>><a href="/analytics"><i class="fa fa-bar-chart-o"></i> <span>实时大盘</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'plan') echo ' class="active"';?>><a href="/plan"><i class="fa fa-thumb-tack"></i> <span>计划管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'bug') echo ' class="active"';?>><a href="/bug"><i class="fa fa-bug"></i> <span>Bug管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'issue') echo ' class="active"';?>><a href="/issue"><i class="fa fa-tasks"></i> <span>任务管理</span></a></li>
-      <li<?php if ($this->uri->segment(1, '') == 'test') echo ' class="active"';?>><a href="/test/plaza"><i class="fa fa-cloud-upload"></i> <span>提测管理</span></a></li>
-      <li<?php if ($this->uri->segment(1, '') == 'analytics') echo ' class="active"';?>><a href="/analytics"><i class="fa fa-medkit"></i> <span>数据分析</span></a></li>
+      <li<?php if ($this->uri->segment(1, '') == 'commit') echo ' class="active"';?>><a href="/commit"><i class="fa fa-cloud-upload"></i> <span>提测管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'repos') echo ' class="active"';?>><a href="/repos"><i class="fa fa-suitcase"></i> <span>代码库管理</span></a></li>
     </ul>
   </div><!-- leftpanelinner -->

@@ -5,7 +5,7 @@
   <div class="mainpanel">
     <?php include('common_headerbar.php');?>
     <?php
-    //载入用户缓存文件
+    //载入代码库缓存文件
     $repos = array();
     if (file_exists(APPPATH.'cache/repos.cache.php')) {
       $repos = unserialize(file_get_contents(APPPATH.'cache/repos.cache.php'));
