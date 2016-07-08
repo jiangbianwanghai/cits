@@ -5,7 +5,7 @@
     <h5 class="sidebartitle">快捷导航</h5>
     <ul class="nav nav-pills nav-stacked nav-bracket">
       <li<?php if ($this->uri->segment(1, 'dashboard') == 'dashboard') echo ' class="active"';?>><a href="/"><i class="fa fa-home"></i> <span>我的面板</span></a></li>
-      <li<?php if ($this->uri->segment(1, '') == 'analytics') echo ' class="active"';?>><a href="/analytics"><i class="fa fa-bar-chart-o"></i> <span>实时大盘</span></a></li>
+      <li<?php if ($this->uri->segment(1, '') == 'heartbeat') echo ' class="active"';?>><a href="/heartbeat"><i class="fa fa-bar-chart-o"></i> <span>实时大盘</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'plan') echo ' class="active"';?>><a href="/plan"><i class="fa fa-thumb-tack"></i> <span>计划管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'bug') echo ' class="active"';?>><a href="/bug"><i class="fa fa-bug"></i> <span>Bug管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'issue') echo ' class="active"';?>><a href="/issue"><i class="fa fa-tasks"></i> <span>任务管理</span></a></li>
