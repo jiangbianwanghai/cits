@@ -21,18 +21,12 @@
           <div class="panel panel-default panel-alt widget-messaging">
           <div class="panel-heading">
               <div class="panel-btns">
-                <a href="" class="panel-edit"><i class="fa fa-ellipsis-h"></i></a>
+                <a href="/issue/index/to_me" class="panel-edit"><i class="fa fa-ellipsis-h"></i></a>
               </div><!-- panel-btns -->
-              <h3 class="panel-title">我参与的任务</h3>
+              <h3 class="panel-title">我受理的任务</h3>
             </div>
-            <div class="panel-body">
-              <ul>
-                <li>
-                  <small class="pull-right">Dec 10</small>
-                  <h4 class="sender">任务标题</h4>
-                  <small>计划标题</small>
-                </li>
-              </ul>
+            <div class="panel-body" id="issue-to-me">
+              <div align="center">数据载入中...</div>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
@@ -41,18 +35,12 @@
           <div class="panel panel-default panel-alt widget-messaging">
           <div class="panel-heading">
               <div class="panel-btns">
-                <a href="" class="panel-edit"><i class="fa fa-ellipsis-h"></i></a>
+                <a href="/bug/index/to_me" class="panel-edit"><i class="fa fa-ellipsis-h"></i></a>
               </div><!-- panel-btns -->
               <h3 class="panel-title">我收到的BUG</h3>
             </div>
-            <div class="panel-body">
-              <ul>
-                <li>
-                  <small class="pull-right">Dec 10</small>
-                  <h4 class="sender">BUG标题</h4>
-                  <small>任务标题</small>
-                </li>
-              </ul>
+            <div class="panel-body" id="bug-to-me">
+              <div align="center">数据载入中...</div>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
@@ -61,18 +49,12 @@
           <div class="panel panel-default panel-alt widget-messaging">
           <div class="panel-heading">
               <div class="panel-btns">
-                <a href="" class="panel-edit"><i class="fa fa-ellipsis-h"></i></a>
+                <a href="/commit/index/from_me" class="panel-edit"><i class="fa fa-ellipsis-h"></i></a>
               </div><!-- panel-btns -->
               <h3 class="panel-title">我的提测记录</h3>
             </div>
-            <div class="panel-body">
-              <ul>
-                <li>
-                  <small class="pull-right">Dec 10</small>
-                  <h4 class="sender">提测记录</h4>
-                  <small>任务标题</small>
-                </li>
-              </ul>
+            <div class="panel-body" id="commit-from-me">
+              <div align="center">数据载入中...</div>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
@@ -85,5 +67,68 @@
 <?php include('common_js.php');?>
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+  //读取指派给我的bug列表
+  setTimeout(function () {
+    $.ajax({
+      type: "GET",
+      url: "/dashboard/get_bug_to_me",
+      dataType: "JSON",
+      success: function(data){
+        if (data.status) {
+          var list = '';
+          for(var p in data.output.data){
+            list += '<li><small class="pull-right">'+data.output.data[p].add_time+'</small><h4 class="sender">'+(parseInt(p)+1)+'.<a href="/bug/view/'+data.output.data[p].id+'">'+data.output.data[p].subject+'</a> <span class="label label-'+data.output.data[p].bugstatus_color+'">'+data.output.data[p].bugstatus_name+'</span> <span class="label label-'+data.output.data[p].bugstate_color+'">'+data.output.data[p].bugstate_name+'</span></h4><small>'+data.output.data[p].issue_name+'</small></li>';
+          }
+          $("#bug-to-me").html('<ul>'+list+'</ul>');
+        } else {
+          $("#bug-to-me").html('<ul><li><p align="center">'+data.message+'</p></li></ul>');
+        }
+      }
+    });
+  }, 200);
+
+  //读取我的提测记录
+  setTimeout(function () {
+    $.ajax({
+      type: "GET",
+      url: "/dashboard/get_commit_from_me",
+      dataType: "JSON",
+      success: function(data){
+        if (data.status) {
+          var list = '';
+          for(var p in data.output.data){
+            list += '<li><small class="pull-right">'+data.output.data[p].add_time+'</small><h4 class="sender">'+(parseInt(p)+1)+'.<a href="/issue/view/'+data.output.data[p].issue_id+'#tr-'+data.output.data[p].id+'">'+data.output.data[p].subject+'</a> <span class="label label-'+data.output.data[p].commitstatus_color+'">'+data.output.data[p].commitstatus_name+'</span> <span class="label label-'+data.output.data[p].commitstate_color+'">'+data.output.data[p].commitstate_name+'</span></h4><small>'+data.output.data[p].issue_name+'</small></li>';
+          }
+          $("#commit-from-me").html('<ul>'+list+'</ul>');
+        } else {
+          $("#commit-from-me").html('<ul><li><p align="center">'+data.message+'</p></li></ul>');
+        }
+      }
+    });
+  }, 100);
+
+  //读取我受理的BUG
+  setTimeout(function () {
+    $.ajax({
+      type: "GET",
+      url: "/dashboard/get_issue_to_me",
+      dataType: "JSON",
+      success: function(data){
+        if (data.status) {
+          var list = '';
+          for(var p in data.output.data){
+            list += '<li><small class="pull-right">'+data.output.data[p].add_time+'</small><h4 class="sender">'+(parseInt(p)+1)+'.<a href="/issue/view/'+data.output.data[p].id+'">'+data.output.data[p].issue_name+'</a> <span class="label label-'+data.output.data[p].issuestatus_color+'">'+data.output.data[p].issuestatus_name+'</span> <span class="label label-'+data.output.data[p].workflow_color+'">'+data.output.data[p].workflow_name+'</span></h4><small>'+data.output.data[p].plan_name+'</small></li>';
+          }
+          $("#issue-to-me").html('<ul>'+list+'</ul>');
+        } else {
+          $("#issue-to-me").html('<ul><li><p align="center">'+data.message+'</p></li></ul>');
+        }
+      }
+    });
+  }, 0);
+});
+</script>
 </body>
 </html>

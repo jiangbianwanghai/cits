@@ -65,6 +65,197 @@ class Dashboard extends CI_Controller {
     }
 
     /**
+     * 获取最新的buglist
+     */
+    public function get_bug_to_me()
+    {
+        //读取系统配置信息
+        $this->load->helper('alphaid');
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $bugflow = $this->config->item('bugflow', 'extension');
+        $bugstatus = $this->config->item('bugstatus', 'extension');
+
+        //读取bug
+        $ids = array();
+        $rows = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/bug/rows?limit=5&filter=accept_user,'.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $rows = $output['content'];
+                foreach ($rows['data'] as $key => $value) {
+                    $rows['data'][$key]['id'] = alphaid($value['id']);
+                    $rows['data'][$key]['bugstatus_color'] = $bugstatus[$value['status']]['span_color'];
+                    $rows['data'][$key]['bugstatus_name'] = $bugstatus[$value['status']]['name'];
+                    $rows['data'][$key]['bugstate_color'] = $bugflow[$value['state']]['span_color'];
+                    $rows['data'][$key]['bugstate_name'] = $bugflow[$value['state']]['name'];
+                    $rows['data'][$key]['add_time'] = date("Y/m/d H:i:s", $value['add_time']);
+                    $ids[] = $value['issue_id'];
+                }
+            } else{
+                exit(json_encode(array('status' => false, 'message' => '无记录')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'message' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //读取相关联的任务
+        if ($ids) {
+            $api = $this->curl->get($system['api_host'].'/issue/rows?ids='.implode(',', array_unique($ids)));
+            if ($api['httpcode'] == 200) {
+                $output = json_decode($api['output'], true);
+                if ($output['status']) {
+                    foreach ($output['content'] as $key => $value) {
+                        $issuearr[$value['id']] = $value;
+                    }
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务API异常.HTTP_CODE['.$api['httpcode'].']');
+                exit(json_encode(array('status' => false, 'message' => '读取任务API异常.HTTP_CODE['.$api['httpcode'].']')));
+            }
+
+            foreach ($rows['data'] as $key => $value) {
+                $rows['data'][$key]['issue_name'] = isset($issuearr[$value['issue_id']]) ? $issuearr[$value['issue_id']]['issue_name'] : 'N/A';
+            }
+        }
+
+        exit(json_encode(array('status' => true, 'output' => $rows)));
+    }
+
+    /**
+     * 获取最新的提测记录
+     */
+    public function get_commit_from_me()
+    {
+        //读取系统配置信息
+        $this->load->helper('alphaid');
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $commitstatus = $this->config->item('commitstatus', 'extension');
+        $commitstate = $this->config->item('commitstate', 'extension');
+
+        $repos = array();
+        if (file_exists(APPPATH.'cache/repos.cache.php')) {
+          $repos = unserialize(file_get_contents(APPPATH.'cache/repos.cache.php'));
+        }
+
+        //读取bug
+        $ids = array();
+        $rows = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/commit/rows?limit=5&filter=add_user,'.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $rows = $output['content'];
+                foreach ($rows['data'] as $key => $value) {
+                    $rows['data'][$key]['subject'] = isset($repos[$value['repos_id']]) ? $repos[$value['repos_id']]['repos_name'].'@'.$value['br'].'#'.$value['test_flag'] : 'N/A';
+                    $rows['data'][$key]['commitstatus_color'] = $commitstatus[$value['status']]['span_color'];
+                    $rows['data'][$key]['commitstatus_name'] = $commitstatus[$value['status']]['name'];
+                    $rows['data'][$key]['commitstate_color'] = $commitstate[$value['state']]['span_color'];
+                    $rows['data'][$key]['commitstate_name'] = $commitstate[$value['state']]['name'];
+                    $rows['data'][$key]['add_time'] = date("Y/m/d H:i:s", $value['add_time']);
+                    $ids[] = $value['issue_id'];
+                }
+            } else{
+                exit(json_encode(array('status' => false, 'message' => '无记录')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'message' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //读取相关联的任务
+        if ($ids) {
+            $api = $this->curl->get($system['api_host'].'/issue/rows?ids='.implode(',', array_unique($ids)));
+            if ($api['httpcode'] == 200) {
+                $output = json_decode($api['output'], true);
+                if ($output['status']) {
+                    foreach ($output['content'] as $key => $value) {
+                        $issuearr[$value['id']] = $value;
+                    }
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务API异常.HTTP_CODE['.$api['httpcode'].']');
+                exit(json_encode(array('status' => false, 'message' => '读取任务API异常.HTTP_CODE['.$api['httpcode'].']')));
+            }
+
+            foreach ($rows['data'] as $key => $value) {
+                $rows['data'][$key]['issue_id'] = isset($issuearr[$value['issue_id']]) ? alphaid($value['issue_id']) : '0';
+                $rows['data'][$key]['issue_name'] = isset($issuearr[$value['issue_id']]) ? $issuearr[$value['issue_id']]['issue_name'] : 'N/A';
+            }
+        }
+
+        exit(json_encode(array('status' => true, 'output' => $rows)));
+    }
+
+    /**
+     * 获取最新的提测记录
+     */
+    public function get_issue_to_me()
+    {
+        //读取系统配置信息
+        $this->load->helper('alphaid');
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+        $workflow = $this->config->item('workflow', 'extension');
+        $issuestatus = $this->config->item('issuestatus', 'extension');
+        $tasktype = $this->config->item('tasktype', 'extension');
+
+        //读取bug
+        $ids = array();
+        $rows = array('total' => 0, 'data' => array());
+        $api = $this->curl->get($system['api_host'].'/issue/rows?limit=5&filter=accept_user,'.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $rows = $output['content'];
+                foreach ($rows['data'] as $key => $value) {
+                    $rows['data'][$key]['id'] = alphaid($value['id']);
+                    $rows['data'][$key]['workflow_color'] = $workflow[$value['workflow']]['span_color'];
+                    $rows['data'][$key]['workflow_name'] = $workflow[$value['workflow']]['name'];
+                    $rows['data'][$key]['issuestatus_color'] = $issuestatus[$value['status']]['span_color'];
+                    $rows['data'][$key]['issuestatus_name'] = $issuestatus[$value['status']]['name'];
+                     $rows['data'][$key]['tasktype'] = $tasktype[$value['type']];
+                    $rows['data'][$key]['add_time'] = date("Y/m/d H:i:s", $value['add_time']);
+                    $ids[] = $value['plan_id'];
+                }
+            } else{
+                exit(json_encode(array('status' => false, 'message' => '无记录')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'message' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //读取相关联的任务
+        if ($ids) {
+            $api = $this->curl->get($system['api_host'].'/plan/rows?ids='.implode(',', array_unique($ids)));
+            if ($api['httpcode'] == 200) {
+                $output = json_decode($api['output'], true);
+                if ($output['status']) {
+                    foreach ($output['content'] as $key => $value) {
+                        $planarr[$value['id']] = $value;
+                    }
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取计划API异常.HTTP_CODE['.$api['httpcode'].']');
+                exit(json_encode(array('status' => false, 'message' => '读取计划API异常.HTTP_CODE['.$api['httpcode'].']')));
+            }
+
+            foreach ($rows['data'] as $key => $value) {
+                $rows['data'][$key]['plan_name'] = isset($planarr[$value['plan_id']]) ? $planarr[$value['plan_id']]['plan_name'] : 'N/A';
+            }
+        }
+
+        exit(json_encode(array('status' => true, 'output' => $rows)));
+    }
+
+    /**
      * 读取提醒信息
      */
     public function get_notify()
