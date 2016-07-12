@@ -6,7 +6,7 @@
       <div class="col-md-7">
         <div class="signin-info">
           <div class="logopanel">
-              <h1><span>//</span> 巧克力任务跟踪系统 <span>//</span></h1>
+              <h1><span>//</span> 巧克力任务跟踪系统<sup>0.3</sup> <span>//</span></h1>
           </div><!-- logopanel -->
           <div class="mb20"></div>
           <h5><strong>CITS - Chocolate Issue Tracker System</strong></h5>
@@ -18,7 +18,8 @@
               <li><i class="fa fa-arrow-circle-o-right"></i> 静态分析持续集成</li>
           </ul>
           <div class="mb20"></div>
-          <strong>CITS不仅是一款任务管理工具，更是您工作改进的好帮手~</strong>
+          
+          <span class="label label-primary"><strong>由于用户系统升级，原有密码失效，老用户请使用“忘记密码？”功能重设您的密码</strong></span>
         </div><!-- signin0-info -->
       </div><!-- col-sm-7 -->
       <div class="col-md-5">

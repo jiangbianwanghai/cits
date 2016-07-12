@@ -17,7 +17,29 @@
 
     <div class="contentpanel">
       <div class="row">
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-3">
+          <div class="panel panel-default widget-profile">
+            <div class="panel-heading">
+              <div class="cover"><img src="<?php echo STATIC_HOST; ?>/images/photos/photo2.png" alt="Cover Photo" /></div>
+            </div>
+            <div class="panel-body">
+              <img src="<?php echo AVATAR_HOST.'/'.USER_NAME.'.jpg'; ?>" class="widget-profile-img thumbnail" width="80" height="80" alt="80x80" />
+              <div class="widget-profile-title">
+                <h4><?php echo REAL_NAME; ?></h4>
+                <small><i class="fa fa-map-marker"></i> <?php echo USER_NAME; ?></small>
+              </div>
+              <div class="row">
+                <div class="col-xs-6 text-center">
+                  <span>我的操作记录</span>
+                </div>
+                <div class="col-xs-6 text-center">
+                  <span>我的统计数据</span>
+                </div>
+              </div>
+            </div>
+          </div><!-- panel -->
+        </div>
+        <div class="col-sm-6 col-md-3">
           <div class="panel panel-default panel-alt widget-messaging">
           <div class="panel-heading">
               <div class="panel-btns">
@@ -31,7 +53,7 @@
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
 
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-3">
           <div class="panel panel-default panel-alt widget-messaging">
           <div class="panel-heading">
               <div class="panel-btns">
@@ -45,7 +67,7 @@
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
 
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-3">
           <div class="panel panel-default panel-alt widget-messaging">
           <div class="panel-heading">
               <div class="panel-btns">
