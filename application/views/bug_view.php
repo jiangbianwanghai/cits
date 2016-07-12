@@ -20,16 +20,15 @@
       <div class="row">
         <div class="col-sm-3 col-lg-2">
           <ul class="nav nav-pills nav-stacked nav-email">
-              <li class="active"><a href="/bug"><i class="glyphicon glyphicon-inbox"></i> Bug列表</a></li>
-              <li><a href="/bug/star"><i class="glyphicon glyphicon-star"></i> 星标</a></li>
-              <li><a href="/bug/trash"><i class="glyphicon glyphicon-trash"></i> 已删除</a></li>
+            <li class="active"><a href="/bug"><i class="fa fa-bug"></i> Bug列表</a></li>
+            <li><a href="/bug/index/to_me"><i class="glyphicon glyphicon-folder-close"></i> 我负责的</a></li>
+            <li><a href="/bug/index/from_me"><i class="glyphicon glyphicon-folder-close"></i> 我创建的</a></li>
           </ul>
           <div class="mb30"></div>
           
           <h5 class="subtitle">快捷方式</h5>
           <ul class="nav nav-pills nav-stacked nav-email mb20">
-            <li><a href="/bug/index/to_me"><i class="glyphicon glyphicon-folder-close"></i> 我负责的</a></li>
-            <li><a href="/bug/index/from_me"><i class="glyphicon glyphicon-folder-close"></i> 我创建的</a></li>
+            <li><a href="/bug/star"><i class="glyphicon glyphicon-star"></i> 星标</a></li>
           </ul>
         </div><!-- col-sm-3 -->
             
@@ -89,7 +88,7 @@
                             </div>
                             <div class="media-body">
                               <span class="media-meta pull-right"><?php echo timediff($profile['add_time'], time());?>前</span>
-                              <h4 class="text-primary"><?php echo $users[$profile['add_user']]['realname'];?> 把这个BUG指派给了 <?php if ($profile['status'] == 1 && ($profile['add_user'] == UID || $profile['accept_user'] == UID)) { ?><a href="javascript:;" id="country" data-type="select2" data-value="<?php echo $profile['accept_user'];?>" data-title="更改受理人"></a><?php } else { echo $users[$profile['accept_user']]['realname']; } ?></h4>
+                              <h4 class="text-primary"><?php echo $users[$profile['add_user']]['realname'];?> 把这个BUG指派给了 <?php if ($profile['status'] == 1 && ($profile['add_user'] == UID || $profile['accept_user'] == UID)) { ?><a href="javascript:;" id="country" data-type="select2" data-value="<?php echo alphaid($profile['accept_user']);?>" data-title="更改受理人"></a><?php } else { echo $users[$profile['accept_user']]['realname']; } ?></h4>
                               <small class="text-muted">BUG反馈人</small>
                               <h4 class="email-subject" style="font-size:18px;">
                               <?php if ($profile['level']) {?><?php echo "<strong style='color:#ff0000;' title='".$level[$profile['level']]['alt']."'>".$level[$profile['level']]['name']."</strong> ";?><?php } ?><?php echo $profile['subject'];?>
@@ -122,51 +121,60 @@
                                 <?php } ?>
                               </h4>
                               <p><?php echo $profile['content'];?></p>
-                              <p>所属任务：<a href="/issue/view/<?php echo $issue['id'];?>"><?php echo $issue['issue_name'];?></a></p>
-                            </div>
-                          </div>
-                          <?php if ($profile['state'] >=1) {?><div align="center"><span class="badge"><?php echo $users[$profile['accept_user']]['realname'].' 已在 '.date("Y-m-d H:i:s", $profile['check_time']).' 确认了这个BUG是有效的';?></span></div><?php } ?>
-                          <?php if ($profile['state'] == -1) {?><div align="center"><span class="badge"><?php echo $users[$profile['accept_user']]['realname'].' 已在 '.date("Y-m-d H:i:s", $profile['check_time']).' 确认了这个BUG是无效的';?></span></div><?php } ?>
-                          <?php
-                            if ($comment['data']) {
-                              foreach ($comment['data'] as $value) {
-                          ?>
-                          <div class="media" id="comment-<?php echo $value['id'];?>">
-                            <div class="pull-left">
-                              <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
-                            </div>
-                            <div class="media-body">
-                              <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == UID && (time() - $value['add_time']) < 3600) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
-                              <h4 class="text-primary"><?php echo $users[$value['add_user']]['realname'];?></h4>
-                              <small class="text-muted"><?php if ($profile['add_user'] == $value['add_user']) { echo 'BUG反馈人'; } elseif ($profile['accept_user'] == $value['add_user']) { echo 'BUG受理人'; } else { echo '路人甲'; } ?></small>
-                              <div><?php echo html_entity_decode($value['content']);?></div>
-                
-                          </div>
-                          </div>
-                          <?php
-                              }
-                            }
-                          ?>  
-                          <div id="box"></div>
-                          <div class="media">
-                            <div class="pull-left">
-                              <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[UID]['username']?>.jpg" align="absmiddle" title="<?php echo $users[UID]['realname'];?>"></div>
-                            </div>
-                            <div class="media-body">
-                              <input type="text" class="form-control" id="post-commit" placeholder="我要发表评论">
-                              <div id="simditor" style="display:none;">
-                                <textarea id="content" name="content"></textarea>
-                                <div class="mb10"></div>
-                                <input type="hidden" value="<?php echo alphaid($profile['id']);?>" id="bug_id" name="bug_id">
-                                <button class="btn btn-primary" id="btnSubmit">提交</button>
-                              </div>
+                              <p>所属任务：<a href="/issue/view/<?php echo alphaid($issue['id']);?>"><?php echo $issue['issue_name'];?></a></p>
                             </div>
                           </div>
                         </div><!-- read-panel -->
-                        
                     </div><!-- panel-body -->
                 </div><!-- panel -->
-                
+
+                <ul class="nav nav-tabs nav-default">
+                  <li class="active"><a data-toggle="tab" href="#all"><strong>评论</strong></a></li>
+                  <li><a data-toggle="tab" href="#added" id="log-list" data-id="<?php echo $bugid;?>"><strong>操作日志</strong></a></li>
+                </ul>
+                <div class="tab-content">
+                <div id="all" class="tab-pane active"> 
+                  <?php
+                    if ($comment['data']) {
+                      foreach ($comment['data'] as $value) {
+                  ?>
+                  <div class="media" id="comment-<?php echo $value['id'];?>">
+                    <div class="pull-left">
+                      <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
+                    </div>
+                    <div class="media-body">
+                      <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == UID && (time() - $value['add_time']) < 3600) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
+                      <h4 class="text-primary"><?php echo $users[$value['add_user']]['realname'];?></h4>
+                      <small class="text-muted"><?php if ($profile['add_user'] == $value['add_user']) { echo 'BUG反馈人'; } elseif ($profile['accept_user'] == $value['add_user']) { echo 'BUG受理人'; } else { echo '路人甲'; } ?></small>
+                      <div><?php echo html_entity_decode($value['content']);?></div>
+        
+                    </div>
+                  </div>
+                  <?php
+                      }
+                    }
+                  ?>  
+                  <div id="box"></div>
+                  <div class="media">
+                    <div class="pull-left">
+                      <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[UID]['username']?>.jpg" align="absmiddle" title="<?php echo $users[UID]['realname'];?>"></div>
+                    </div>
+                    <div class="media-body">
+                      <input type="text" class="form-control" id="post-commit" placeholder="我要发表评论">
+                      <div id="simditor" style="display:none;">
+                        <textarea id="content" name="content"></textarea>
+                        <div class="mb10"></div>
+                        <input type="hidden" value="<?php echo alphaid($profile['id']);?>" id="bug_id" name="bug_id">
+                        <button class="btn btn-primary" id="btnSubmit">提交</button>
+                      </div>
+                    </div>
+                  </div>  
+                </div><!-- tab-pane -->
+                  
+                <div id="added" class="tab-pane">
+                  <div align="center"><img src="<?php echo STATIC_HOST; ?>/images/loaders/loader19.gif" /></div>
+                </div><!-- tab-pane -->
+              </div><!-- tab-content -->
             </div><!-- col-sm-9 -->
             
         </div><!-- row -->
@@ -279,9 +287,30 @@ $(function(){
     });
   });
 
+  //读取bug相关的操作日志
+  $("#log-list").click(function(){
+    id = $(this).attr("data-id");
+      $.ajax({
+        type: "GET",
+        url: "/bug/log_list/"+id,
+        dataType: "JSON",
+        success: function(data){
+          if (data.total) {
+            var log_list = '';
+            for(var p in data.comment){
+              log_list += '<tr class="unread"><td></td><td><a href="" class="star"><i class="fa fa-dot-circle-o"></i></a></td><td><div class="media"><a href="#" class="face"><img alt="" src="'+data.comment[p].avatar+'"></a><div class="media-body"><span class="media-meta pull-right">'+data.comment[p].friendtime+'前</span><h4 class="text-primary">'+data.comment[p].realname+'</h4><small class="text-muted"></small><p class="email-summary">'+data.comment[p].content+'</p></div></div></td></tr>';
+            }
+            $("#added").html('<div class="table-responsive"><table class="table table-email"><tbody>'+log_list+'</tbody></table></div>');
+          } else {
+            $("#added").html('<div align="center">暂无操作日志</div>');
+          }
+        }
+      });
+  });
+
   // Select 2 (dropdown mode)
   var countries = [];
-  $.each({<?php foreach($users as $val) { ?>"<?php echo $val['uid'];?>": "<?php echo $val['realname'];?>",<?php } ?> }, function(k, v) {
+  $.each({<?php foreach($users as $val) { ?>"<?php echo alphaid($val['uid']);?>": "<?php echo $val['realname'];?>",<?php } ?> }, function(k, v) {
       countries.push({id: k, text: v});
   });
 
@@ -293,7 +322,7 @@ $(function(){
         ajaxOptions: {
           type: 'GET'
         },
-        url: '/bug/change_accept/<?php echo $profile["id"];?>',
+        url: '/bug/change_accept/<?php echo alphaid($profile["id"]);?>',
         send: 'always',
         select2: {
             width: 150,
@@ -324,7 +353,7 @@ $(function(){
   });
 
   $("#over").click(function(){
-    var c = confirm('你确定要已经修好了此BUG吗？如果有代码变动别忘记提交代码');
+    var c = confirm('你确定已经修好了此BUG吗？如果有代码变动别忘记提交代码');
       if(c) {
         id = $(this).attr("ids");
         $.ajax({

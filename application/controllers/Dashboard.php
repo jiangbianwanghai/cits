@@ -278,7 +278,7 @@ class Dashboard extends CI_Controller {
                     $output['content']['data'][$key]['user_realname'] = $users[$value['user']]['realname'];
                     $output['content']['data'][$key]['log_action'] = $value['log']['action'];
                     $output['content']['data'][$key]['log_subject'] = $value['log']['subject'];
-                    
+                    $url = '';
                     if ($value['log']['target_type'] == '3') {
                         $url = 'issue/view/'.alphaid($value['log']['target']);
                         $output['content']['data'][$key]['log_target_type'] = '任务';
@@ -289,6 +289,7 @@ class Dashboard extends CI_Controller {
                     $output['content']['data'][$key]['log_sender_realname'] = $users[$value['log']['sender']]['realname'];
                     $subject = '给你';
                     $subject = $value['log']['action'].'了';
+                    
                     if ($value['log']['target_type'] == '3') {
                         $subject .= '任务';
                         $url = '/issue/view/'.alphaid($value['log']['target']);

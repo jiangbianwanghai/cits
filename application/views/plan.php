@@ -33,7 +33,7 @@
           <?php } ?>
         </div><!-- col-sm-3 -->
         <div class="col-sm-9 col-lg-10">
-          <?php if ($planFolder) {?><div class="mb10" align="right"><a href="/issue/add?planid=<?php echo urlencode($curr_plan['sha']);?>" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> 添加任务</a></div><?php } ?>
+          <?php if ($planFolder) {?><div class="mb10" align="right"><a href="/issue/add?planid=<?php echo alphaid($curr_plan['id']);?>" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> 添加任务</a></div><?php } ?>
           <?php if ($curr_plan['id']) {?>
           <div class="panel panel-default">
             <div class="panel-body">
@@ -60,10 +60,10 @@
                     </button>
                     <ul class="dropdown-menu">
                       <?php if ($flow) {?>
-                      <li><a href="/plan<?php if ($curr_plan) echo '?planid='.urlencode($curr_plan['sha']);?><?php if ($type) echo '&type='.$type;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
+                      <li><a href="/plan<?php if ($curr_plan) echo '?planid='.alphaid($curr_plan['id']);?><?php if ($type) echo '&type='.$type;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
                       <?php } ?>
                       <?php foreach ($workflow as $key => $value) {?>
-                      <?php if ($flow != $value['en_name'] || !$flow) {?><li><a href="/plan<?php if ($curr_plan) echo '?planid='.urlencode($curr_plan['sha']);?>&flow=<?php echo $value['en_name']; ?><?php if ($type) echo '&type='.$type;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> <?php echo $value['name'];?></a></li><?php } ?>
+                      <?php if ($flow != $value['en_name'] || !$flow) {?><li><a href="/plan<?php if ($curr_plan) echo '?planid='.alphaid($curr_plan['id']);?>&flow=<?php echo $value['en_name']; ?><?php if ($type) echo '&type='.$type;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> <?php echo $value['name'];?></a></li><?php } ?>
                       <?php } ?>
                     </ul>
                   </div>
@@ -74,10 +74,10 @@
                     </button>
                     <ul class="dropdown-menu">
                       <?php if ($type) {?>
-                      <li><a href="/plan<?php echo '?curr_plan='.urlencode($curr_plan['sha']);?><?php if ($flow) echo '&flow='.$flow;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
+                      <li><a href="/plan<?php echo '?curr_plan='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
                       <?php } ?>
-                      <?php if ($type != 'task' || !$type) {?><li><a href="/plan<?php echo '?curr_plan='.urlencode($curr_plan['sha']);?><?php if ($flow) echo '&flow='.$flow;?>&type=task"><i class="glyphicon glyphicon-folder-open mr5"></i> TASK</a></li><?php } ?>
-                      <?php if ($type != 'bug' || !$type) {?><li><a href="<?php echo '?curr_plan='.urlencode($curr_plan['sha']);?><?php if ($flow) echo '&flow='.$flow;?>&type=bug"><i class="glyphicon glyphicon-folder-open mr5"></i> BUG</a></li><?php } ?>
+                      <?php if ($type != 'task' || !$type) {?><li><a href="/plan<?php echo '?curr_plan='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>&type=task"><i class="glyphicon glyphicon-folder-open mr5"></i> TASK</a></li><?php } ?>
+                      <?php if ($type != 'bug' || !$type) {?><li><a href="<?php echo '?curr_plan='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>&type=bug"><i class="glyphicon glyphicon-folder-open mr5"></i> BUG</a></li><?php } ?>
                     </ul>
                   </div>
                 </div>

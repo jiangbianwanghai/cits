@@ -565,8 +565,7 @@
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-success',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-success',
                 sticky: false,
                 time: ''
               });
@@ -577,8 +576,7 @@
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.error,
-                  class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-danger',
                 sticky: false,
                 time: ''
               });
@@ -624,7 +622,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-success',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -636,7 +633,6 @@
                 title: '提醒',
                 text: data.error,
                   class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -659,7 +655,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-success',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -671,7 +666,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -693,8 +687,7 @@
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-success',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-success',
                 sticky: false,
                 time: ''
               });
@@ -705,8 +698,7 @@
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-danger',
                 sticky: false,
                 time: ''
               });
@@ -729,7 +721,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-success',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -741,7 +732,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -799,7 +789,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-success',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -811,7 +800,6 @@
                 title: '提醒',
                 text: data.message,
                   class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
                 sticky: false,
                 time: ''
               });
@@ -870,7 +858,6 @@
               title: '提醒',
               text: data.message,
                 class_name: 'growl-success',
-                image: '/static/images/screen.png',
               sticky: false,
               time: ''
             });
@@ -882,7 +869,6 @@
               title: '提醒',
               text: data.message,
                 class_name: 'growl-danger',
-                image: '/static/images/screen.png',
               sticky: false,
               time: ''
             });
@@ -913,8 +899,7 @@
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-danger',
                 sticky: false,
                 time: ''
               });

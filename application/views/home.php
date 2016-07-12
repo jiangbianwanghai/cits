@@ -26,7 +26,7 @@
               <h3 class="panel-title">我受理的任务</h3>
             </div>
             <div class="panel-body" id="issue-to-me">
-              <div align="center">数据载入中...</div>
+              <div align="center"><img src="<?php echo STATIC_HOST; ?>/images/loaders/loader19.gif" /></div>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
@@ -40,7 +40,7 @@
               <h3 class="panel-title">我收到的BUG</h3>
             </div>
             <div class="panel-body" id="bug-to-me">
-              <div align="center">数据载入中...</div>
+              <div align="center"><img src="<?php echo STATIC_HOST; ?>/images/loaders/loader19.gif" /></div>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-6 -->
@@ -54,7 +54,7 @@
               <h3 class="panel-title">我的提测记录</h3>
             </div>
             <div class="panel-body" id="commit-from-me">
-              <div align="center">数据载入中...</div>
+              <div align="center"><img src="<?php echo STATIC_HOST; ?>/images/loaders/loader19.gif" /></div>
             </div><!-- panel-body -->
           </div><!-- panel -->
         </div><!-- col-sm-6 -->

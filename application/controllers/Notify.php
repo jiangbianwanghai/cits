@@ -27,6 +27,7 @@ class Notify extends CI_Controller {
                     $data['notify']['data'][$key]['sender'] = $value['log']['sender'];
                     $subject = '给你';
                     $subject = $value['log']['action'].'了';
+                    $url = '';
                     if ($value['log']['target_type'] == '3') {
                         $subject .= '任务';
                         $url = '/issue/view/'.alphaid($value['log']['target']);
