@@ -1270,4 +1270,87 @@ class Bug extends CI_Controller {
 
         exit(json_encode(array('status' => true, 'message' => '操作成功')));
     }
+
+    public function del_comment()
+    {
+        $id = $this->uri->segment(3, 0);
+        $this->load->helper('alphaid');
+        $id = alphaid($id, 1);
+
+        //更改记录状态
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+
+        $api = $this->curl->get($system['api_host'].'/comment/profile?id='.$id.'&type=bug');
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':记录不存在。评论id:['.$id.']');
+                exit(json_encode(array('status' => false, 'error' => '记录不存在')));
+            } else {
+                $content = $output['content']['content'];
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取bug详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取bug详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        $api = $this->curl->get($system['api_host'].'/bug/profile?id='.$output['content']['bug_id']);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':bug不存在。任务id:['.$id.']');
+                exit(json_encode(array('status' => false, 'error' => 'bug不存在')));
+            } else {
+                $subject = $output['content']['subject'];
+                $bug_id = $output['content']['id'];
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取bug详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取bug详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        $api = $this->curl->get($system['api_host'].'/comment/del?id='.$id.'&type=bug&user='.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':删除失败');
+                exit(json_encode(array('status' => false, 'error' => '删除失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取bug详情API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '读取bug详情API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //写操作日志
+        $Post_data_handle['sender'] = UID;
+        $Post_data_handle['action'] = '删除评论';
+        $Post_data_handle['target'] = $bug_id;
+        $Post_data_handle['target_type'] = 5;
+        $Post_data_handle['type'] = 1;
+        $Post_data_handle['subject'] = $subject;
+        $Post_data_handle['content'] = $content;
+        $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+        if ($api['httpcode'] == 200) {
+            $output_handle = json_decode($api['output'], true);
+            if ($output_handle['status']) {
+                //发送通知提醒
+                $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$id.'|5|'.UID.'&auth=mypass123'); //格式:log_id|target_id|target_type|sender_id
+                if ($api['httpcode'] == 200) {
+                    if ($api['output'] != 'HTTPSQS_PUT_OK') {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$api['output']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':打队列API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+        }
+
+        exit(json_encode(array('status' => true, 'message' => '操作成功')));
+    }
 }

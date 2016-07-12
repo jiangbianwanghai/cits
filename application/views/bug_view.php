@@ -138,12 +138,12 @@
                     if ($comment['data']) {
                       foreach ($comment['data'] as $value) {
                   ?>
-                  <div class="media" id="comment-<?php echo $value['id'];?>">
+                  <div class="media" id="comment-<?php echo alphaid($value['id']);?>">
                     <div class="pull-left">
                       <div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="<?php echo $users[$value['add_user']]['realname'];?>"></div>
                     </div>
                     <div class="media-body">
-                      <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == UID && (time() - $value['add_time']) < 3600) {?><br /><a class="del" ids="<?php echo $value['id'];?>" href="javascript:;">删除</a><?php } ?></span>
+                      <span class="media-meta pull-right"><?php echo timediff($value['add_time'], time());?><?php if ($value['add_user'] == UID && (time() - $value['add_time']) < 3600) {?><br /><a class="del" ids="<?php echo alphaid($value['id']);?>" href="javascript:;">删除</a><?php } ?></span>
                       <h4 class="text-primary"><?php echo $users[$value['add_user']]['realname'];?></h4>
                       <small class="text-muted"><?php if ($profile['add_user'] == $value['add_user']) { echo 'BUG反馈人'; } elseif ($profile['accept_user'] == $value['add_user']) { echo 'BUG受理人'; } else { echo '路人甲'; } ?></small>
                       <div><?php echo html_entity_decode($value['content']);?></div>
