@@ -30,10 +30,10 @@
               </div>
               <div class="row">
                 <div class="col-xs-6 text-center">
-                  <span>我的操作记录</span>
+                  <span><a href="/user/log">我的操作记录</a></span>
                 </div>
                 <div class="col-xs-6 text-center">
-                  <span>我的统计数据</span>
+                  <span><a href="/user">我的统计数据</a></span>
                 </div>
               </div>
             </div>
