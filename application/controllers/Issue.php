@@ -167,12 +167,8 @@ class Issue extends CI_Controller {
 
         //获取传值
         $planid = $data['planid'] = $this->input->get('planid', TRUE);
-        if ($planid) {
-            $planid = $this->encryption->decrypt($planid);
-            if (!($planid != 0 && ctype_digit($planid))) {
-                show_error('计划id异常', 500, '错误');
-            }
-        }
+        $this->load->helper('alphaid');
+        $planid = alphaid($planid, 1);
 
         //读取系统配置信息
         $this->config->load('extension', TRUE);

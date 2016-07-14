@@ -14,6 +14,81 @@ class User extends CI_Controller {
     {
         $data['PAGE_TITLE'] = '用户面板';
 
+        //读取个人信息
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+
+        $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $data['profile'] = $output['content'];
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':获取个人信息API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        $report = array();
+
+        //输出受理统计
+        $api = $this->curl->get($system['api_host'].'/report/accept?uid='.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                foreach ($output['content'] as $key => $value) {
+                    $time = strtotime($value['perday']);
+                    $report[$time]['perday'] = $value['perday'];
+                    $report[$time]['issue'] = $value['total'];
+                    $report[$time]['bug'] = 0;
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':输出受理统计API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '输出受理统计API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //输出bug统计
+        $api = $this->curl->get($system['api_host'].'/report/bug?uid='.UID);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                foreach ($output['content'] as $key => $value) {
+                    $time = strtotime($value['perday']);
+                    $report[$time]['perday'] = $value['perday'];
+                    $report[$time]['bug'] = $value['total'];
+                    !isset($report[$time]['issue']) && $report[$time]['issue'] = 0;
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':'.$output['error']);
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':输出bug统计API异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '输bug统计API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+        //print_r($report);
+        if ($report) {
+            foreach ($report as $key => $value) {
+                $tmp[] = $key;
+            }
+            sort($tmp);
+            foreach ($tmp as $key => $value) {
+                $report_tmp[] = $report[$value];
+            }
+        }
+        $data['report'] = $report_tmp;
+
+        //刷新在线用户列表（埋点）
+        $this->load->model('Model_online', 'online', TRUE);
+        $this->online->refresh(UID);
+        $onlineUsers = $this->online->users();
+        $data['online_users'] = $onlineUsers;
+
         $this->load->view('user', $data);
     }
 

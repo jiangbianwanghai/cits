@@ -28,7 +28,7 @@
                 <h4><?php echo REAL_NAME; ?></h4>
                 <small><i class="fa fa-map-marker"></i> <?php echo USER_NAME; ?></small>
               </div>
-              <div class="row">
+              <div class="row user-p">
                 <div class="col-xs-6 text-center">
                   <span><a href="/user/log">我的操作记录</a></span>
                 </div>
