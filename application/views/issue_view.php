@@ -1125,9 +1125,9 @@ $(function(){
     $(obj).attr('curr', env);
     var merge = $(this).attr('merge');
     if (merge == 1) {
-      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy br="+br+" rev="+rev+" issue=<?php echo $issueid; ?>";
+      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy br="+br+" rev="+rev+" issue=<?php echo $issue_profile['id']; ?>";
     } else if (repos == 'gc.style-conf') {
-      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy rev="+rev+" issue=<?php echo $issueid; ?>";
+      var cap = "cd ~/"+env+"/"+repos+"/ && cap staging deploy rev="+rev+" issue=<?php echo $issue_profile['id']; ?>";
     } else {
       var cap = '此代码库不适合使用capistrano部署，请使用CAP部署';
     }
