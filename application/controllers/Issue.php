@@ -387,6 +387,12 @@ class Issue extends CI_Controller {
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
+        //刷新在线用户列表（埋点）
+        $this->load->model('Model_online', 'online', TRUE);
+        $this->online->refresh(UID);
+        $onlineUsers = $this->online->users();
+        $data['online_users'] = $onlineUsers;
+
         $this->load->view('issue_edit', $data);
     }
 
@@ -891,7 +897,7 @@ class Issue extends CI_Controller {
         }
 
         //读取操作日志
-        $api = $this->curl->get($system['api_host'].'/handle/get_rows?id='.$id);
+        $api = $this->curl->get($system['api_host'].'/handle/get_rows?id='.$id.'&type=issue');
         if ($api['httpcode'] == 200) {
             $output_log = json_decode($api['output'], true);
             if (!$output_log['status']) {

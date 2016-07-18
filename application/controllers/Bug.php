@@ -849,7 +849,7 @@ class Bug extends CI_Controller {
         }
 
         //读取操作日志
-        $api = $this->curl->get($system['api_host'].'/handle/get_rows?id='.$id);
+        $api = $this->curl->get($system['api_host'].'/handle/get_rows?id='.$id.'&type=bug');
         if ($api['httpcode'] == 200) {
             $output_log = json_decode($api['output'], true);
             if (!$output_log['status']) {
