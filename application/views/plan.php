@@ -415,7 +415,7 @@ jQuery(document).ready(function(){
     //获取我受理的任务量统计
     $.ajax({
       type: "GET",
-      url: "/plan/rate/<?php echo $curr_plan['id']; ?>",
+      url: "/plan/rate/<?php echo alphaid($curr_plan['id']); ?>",
       dataType: "text",
       success: function(data){
         if (data) {

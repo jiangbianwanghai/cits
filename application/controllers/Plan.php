@@ -217,6 +217,64 @@ class Plan extends CI_Controller {
      */
     public function rate()
     {
+        $this->load->helper('alphaid');
 
+        //获取传值
+        $planid = $this->uri->segment(3, 0);
+        if ($planid) {
+            $planid = alphaid($planid, 1);
+            if (!($planid != 0 && ctype_digit($planid))) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':计划id异常');
+                exit(json_encode(array('status' => false, 'error' => '计划id异常')));
+            }
+        }
+
+        //获取项目ID并验证输入参数的合法性
+        $this->load->model('Model_plan', 'plan', TRUE);
+        $currPlan = $this->plan->fetchOne($planId, 'project_id');
+
+        //获取计划中的任务
+        $this->load->model('Model_issue', 'issue', TRUE);
+        $issueRows = $this->issue->listByPlan($planId, $currPlan['project_id'], 7, 0, 100, 0);
+        if (!$issueRows['total']) {
+            exit('任务未完成，无法参与计算');
+        }
+
+        //循环计算每个任务的提测率
+        $rateArr = array();
+        $this->load->model('Model_test', 'test', TRUE);
+        //组合issue ID
+        foreach ($issueRows['data'] as $key => $val) {
+            $issueIdArr[] = $val['id'];
+        }
+        $testRows = $this->test->rowsOfPlan($issueIdArr);
+        $maxTest = 0;
+        $testIdArr = array();
+        //计算每个任务的提测成功率
+        if ($testRows) {
+            foreach ($testRows as $key => $value) {
+                if (isset($testIdArr[$value['issue_id']][$value['repos_id']])) {
+                    $testIdArr[$value['issue_id']][$value['repos_id']] += 1;
+                } else {
+                    $testIdArr[$value['issue_id']][$value['repos_id']] = 1;
+                }
+            }
+            if ($testIdArr) {
+                foreach ($testIdArr as $key => $value) {
+                    $rateArr[$key] = 1/max($value);
+                }
+            }
+        }
+
+        //输出整个计划的提测率
+        if ($rateArr) {
+            $rateTotal = 0;
+            foreach ($rateArr as $key => $value) {
+                $rateTotal += $value;
+            }
+            echo sprintf("%.2f", $rateTotal/count($rateArr));
+        } else {
+            echo '无提测数据用于计算';
+        }
     }
 }
