@@ -243,13 +243,8 @@ class Issue extends CI_Controller {
 
         //解析planid
         $planid = $this->input->post('planid');
-        if ($planid) {
-            $planid = $this->encryption->decrypt($planid);
-            if (!($planid != 0 && ctype_digit($planid))) {
-                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':计划id错误');
-                exit(json_encode(array('status' => false, 'error' => '计划id错误')));
-            }
-        }
+        $this->load->helper('alphaid');
+        $planid = alphaid($planid, 1);
 
         //写入数据
         $Post_data['issue_name'] = $this->input->post('issue_name');
