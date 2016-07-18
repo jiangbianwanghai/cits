@@ -120,6 +120,7 @@
     <p class="text-right"><small>页面执行时间 <em>{elapsed_time}</em> 秒 使用内存 {memory_usage}</small></p>
     </div><!-- contentpanel -->
   </div><!-- mainpanel -->
+  <?php include('common_tab.php');?>
 </section>
 
 <?php include('common_js.php');?>

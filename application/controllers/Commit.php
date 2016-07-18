@@ -429,6 +429,7 @@ class Commit extends CI_Controller {
         $system = $this->config->item('system', 'extension');
         $sqsUrl = $system['queue_host']."/?name=commit&opt=put&data=";
         $sqsUrl .= $id."|".$branch."&auth=mypass123";
+        //echo $sqsUrl;
 
         //发送消息给后端worker
         $this->load->library('curl');

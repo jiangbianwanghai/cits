@@ -182,7 +182,7 @@
     </div><!-- contentpanel -->
     
   </div><!-- mainpanel -->
-  
+  <?php include('common_tab.php');?>
 </section>
 
 <!-- Modal -->

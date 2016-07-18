@@ -88,7 +88,7 @@ th,td{white-space:nowrap;}
     </div><!-- contentpanel -->
     
   </div><!-- mainpanel -->
-  
+  <?php include('common_tab.php');?>
 </section>
 <?php include('common_js.php');?>
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>

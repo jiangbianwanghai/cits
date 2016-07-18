@@ -188,6 +188,12 @@ class Issue extends CI_Controller {
             show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
         }
 
+        //刷新在线用户列表（埋点）
+        $this->load->model('Model_online', 'online', TRUE);
+        $this->online->refresh(UID);
+        $onlineUsers = $this->online->users();
+        $data['online_users'] = $onlineUsers;
+
         $this->load->view('issue_add', $data);
     }
 
