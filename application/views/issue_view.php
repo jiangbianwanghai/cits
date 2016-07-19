@@ -1228,9 +1228,9 @@ $(function(){
             $(this).hide();
             $("#td-fix").addClass('blue');
             $("#td-fix").text('修复完毕');
-            tip(data.message, data.url, 'success', 2000);
+            tip(data.message, window.location.href, 'success', 2000);
           } else {
-            tip(data.message, data.url, 'danger', 5000);
+            tip(data.message, window.location.href, 'danger', 5000);
           };
         }
       });
@@ -1252,9 +1252,9 @@ $(function(){
             $(this).hide();
             $("#td-wait").addClass('blue');
             $("#td-wait").text('测试通过');
-            tip(data.message, data.url, 'success', 2000);
+            tip(data.message, window.location.href, 'success', 2000);
           } else {
-            tip(data.message, data.url, 'danger', 5000);
+            tip(data.message, window.location.href, 'danger', 5000);
           };
         }
       });
