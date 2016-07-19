@@ -607,6 +607,8 @@
     $("#resolve").click(
       changeIssueStatus('#resolve','resolve','确认验证通过并告知任务添加人吗？')
     );
+
+    //测试代码部署
     $(".zhanyong").click(function(){
       var c = confirm('确认要占用这个环境吗？');
       if(c) {
@@ -614,25 +616,23 @@
         env = $(this).attr('data-value');
         $.ajax({
           type: "GET",
-          url: "/test/env?testId="+id+"&envId="+env,
+          url: "/commit/env?testId="+id+"&envId="+env,
           dataType: "JSON",
           success: function(data){
             if (data.status) {
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-success',
+                class_name: 'growl-success',
                 sticky: false,
                 time: ''
               });
-              setTimeout(function(){
-                location.href = "/issue/view/<?php echo $issueid;?>";
-              }, 1000);
+              
             } else {
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.error,
-                  class_name: 'growl-danger',
+                class_name: 'growl-danger',
                 sticky: false,
                 time: ''
               });
@@ -641,6 +641,7 @@
         });
       }
     });
+
     $(".online").click(function(){
       var c = confirm('确认改为上线状态吗？');
       if(c) {
