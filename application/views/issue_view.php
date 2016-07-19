@@ -322,7 +322,7 @@
               </tr>
               <tr>
                 <td width="100px">所属计划</td>
-                <td><?php if ($plan_profile) { echo '<a href="/plan?planId='.urlencode($this->encryption->encrypt($plan_profile['id'])).'" target="_blank">'.$plan_profile['plan_name'].'</a>'; }?></td>
+                <td><?php if ($plan_profile) { echo '<a href="/plan?planid='.alphaid($plan_profile['id']).'" target="_blank">'.$plan_profile['plan_name'].'</a>'; }?></td>
                 <td width="120px">贡献者</td>
                 <td>
                   <?php
@@ -1276,15 +1276,16 @@ $(function(){
             $(this).hide();
             $("#td-online").addClass('blue');
             $("#td-online").text('已上线');
-            tip(data.message, data.url, 'success', 2000);
+            tip(data.message, window.location.href, 'success', 2000);
           } else {
-            tip(data.message, data.url, 'danger', 5000);
+            tip(data.message, window.location.href, 'danger', 5000);
           };
         }
       });
     }
   });
 
+  //锚点高亮
   var ss = window.location.href.split("#");
   $('#'+ss[1]).css('background','#f1f1f1')
 
