@@ -112,7 +112,7 @@
                         </div>
                       </td>
                       <td>
-                        <a href="javascript:;" item-id="<?php echo $value['id'];?>" class="star<?php if ($this->uri->segment(2, '') == 'star') { echo ' star-checked'; } else { if (isset($star[$value['id']])) echo ' star-checked'; }?>"><i class="glyphicon glyphicon-star"></i></a>
+                        <a href="javascript:;" item-id="<?php echo alphaid($value['id']);?>" class="star<?php if ($this->uri->segment(2, '') == 'star') { echo ' star-checked'; } else { if (in_array($value['id'], $star)) echo ' star-checked'; }?>"><i class="glyphicon glyphicon-star"></i></a>
                       </td>
                       <td align="center" width="40px">
                         <a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left">
@@ -351,14 +351,13 @@ jQuery(document).ready(function(){
           $.ajax({
             type: "GET",
             dataType: "JSON",
-            url: "/issue/star_ajax/"+id,
+            url: "/issue/star_add/"+id,
             success: function(data){
               if (data.status) {
                 jQuery.gritter.add({
                   title: '提醒',
                   text: data.message,
-                    class_name: 'growl-success',
-                    image: '/static/images/screen.png',
+                  class_name: 'growl-success',
                   sticky: false,
                   time: ''
                 });
@@ -379,8 +378,7 @@ jQuery(document).ready(function(){
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-success',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-success',
                 sticky: false,
                 time: ''
               });

@@ -112,6 +112,21 @@ class Plan extends CI_Controller {
                 show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
             }
 
+            //读取关注数据
+            $data['star'] = array();
+            $api = $this->curl->get($system['api_host'].'/star/get_rows_by_type?uid='.UID.'&type=1');
+            if ($api['httpcode'] == 200) {
+                $output = json_decode($api['output'], true);
+                if ($output['status']) {
+                    foreach ($output['content']['data'] as $key => $value) {
+                        $data['star'][] = $value['star_id'];
+                    }
+                }
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':关注API异常.HTTP_CODE['.$api['httpcode'].']');
+                show_error('关注API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+            }
+
             //根据计划和项目id读取参与计划的人员
             $api = $this->curl->get($system['api_host'].'/accept/users_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
             if ($api['httpcode'] == 200) {
