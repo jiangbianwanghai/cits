@@ -194,7 +194,7 @@
                 ?>
                 <tr id="tr-<?php echo $value['id'];?>" class="unread">
                   <td><a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left"><div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="添加人：<?php echo $users[$value['add_user']]['realname'];?>"></div></a></td>
-                  <td><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?></td>
+                  <td id="process-<?php echo $value['id'];?>"><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?></td>
                   <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a>@'.$value['br']; }?> #<?php echo $value['test_flag'];?>
                   </td>
                   <td width="120">
@@ -639,13 +639,7 @@
                       $("#rank-"+id).text('测试环境');
                       $("#state-"+id).text('测试中');
                     } else {
-                      jQuery.gritter.add({
-                        title: '部署进度',
-                        text: data.content+data.process,
-                        class_name: 'growl-success',
-                        sticky: false,
-                        time: '500'
-                      });
+                      $("#process-"+id).text(data.process+'%');
                     }
                   } else {
                     jQuery.gritter.add({
