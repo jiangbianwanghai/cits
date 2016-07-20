@@ -41,19 +41,16 @@
                             } else {
                               $day = date('Y-m-d', $value['add_time']).' 星期'.$weekarray[date("w",$value['add_time'])];
                             }
-                            echo '<tr><td colspan="8"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
+                            echo '<tr><td colspan="4"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
                           }
                         $timeGroup[$timeDay] = 1;
-                        $sha = $this->encryption->encrypt($value['id']);
-                        $md5 = md5($value['id']);
                     ?>
-                    <tr class="unread" id="item-<?php echo $md5;?>">
+                    <tr class="unread">
                       <td></td>
                       <td><a href="" class="star"><i class="fa fa-dot-circle-o"></i></a></td>
-                      <td class="description" projectid="<?php echo $md5;?>"><?php echo $users[$value['sender']]['realname'];?> <?php echo $value['subject']; ?></td>
+                      <td class="description"><?php echo $users[$value['sender']]['realname'];?> <?php echo $value['text']; ?></td>
                       <td width="140"><span class="media-meta pull-right"><?php echo date("Y/m/d H:i", $value['add_time'])?></span></td>
                     </tr>
-                    <tr id="description-<?php echo $md5;?>" style="display:none;"><td colspan="5" style="background-color:#fff;">content</div></td></tr>
                     <?php
                         }
                       } else {

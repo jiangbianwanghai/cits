@@ -138,6 +138,37 @@ class User extends CI_Controller {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
                 $data['logs'] = $output['content'];
+                $target_type_arr = array('1' => array('zh' => '项目', 'en' => 'project'), '2' => array('zh' => '计划', 'en' => 'plan'), '3' => array('zh' => '任务', 'en' => 'issue'), '4' => array('zh' => '提测', 'en' => 'commit'), '5' => array('zh' => 'Bug', 'en' => 'bug'));
+                foreach ($data['logs']['data'] as $key => $value) {
+                    $text = '';
+                    if ($value['action'] == '指派' || $value['action'] == '变更') {
+                        $text .= '将 ';
+                    } elseif($value['action'] == '提测' || $value['action'] == '反馈') {
+                        $text .= '向 ';
+                    } else {
+                        $text .= $value['action'].'了 ';
+                    }
+                    $text .= $target_type_arr[$value['target_type']]['zh'].' <a href="/'.$target_type_arr[$value['target_type']]['en'].'/view/'.alphaid($value['target']).'">'.$value['subject'].'</a>';
+                    if ($value['action'] == '指派') {
+                        $text .= ' '.$value['action'].'给了 ';
+                    }
+                    if ($value['action'] == '变更') {
+                        $text .= ' 状态'.$value['action'].'为 ';
+                    }
+                    if ($value['action'] == '提测') {
+                        $text .= ' '.$value['action'].'了代码 ';
+                    }
+                    if ($value['action'] != '编辑' && $value['action'] != '反馈' && $value['action'] != '评论') {
+                        $text .= ' '.$value['content'];
+                    }
+                    if ($value['action'] == '反馈') {
+                        $text .= ' '.$value['action'].'了一个BUG <a href="/bug/view/'.alphaid($value['content']).'">查看该BUG</a>';
+                    }
+                    if ($value['action'] == '评论') {
+                        $text .= ' <a href="/issue/view/'.alphaid($value['target']).'#comment-'.alphaid($value['content']).'">查看评论</a>';
+                    }
+                    $data['logs']['data'][$key]['text'] = $text;
+                }
             }
         } else {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
