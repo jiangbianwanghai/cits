@@ -638,6 +638,7 @@
                       clearInterval(get_process);
                       $("#rank-"+id).text('测试环境');
                       $("#state-"+id).text('测试中');
+                      $("#process-"+id).text(data.process+'%');
                     } else {
                       $("#process-"+id).text(data.process+'%');
                     }
@@ -652,7 +653,7 @@
                   };
                 }
               });
-              }, 500); 
+              }, 1000); 
             } else {
               jQuery.gritter.add({
                 title: '提醒',

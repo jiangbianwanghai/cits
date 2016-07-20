@@ -670,7 +670,18 @@ class Commit extends CI_Controller {
                 exit(json_encode(array('status' => false, 'error' => '部署失败')));
             }
         } else {
-            exit(json_encode(array('status' => true, 'content' => '部署中', 'process' => '50')));
+            if (!$this->input->cookie('commit_'.$test_id)) {
+                $this->input->set_cookie(array('name' => 'commit_'.$test_id, 'value' => 1, 'expire' => 600));
+            } else {
+                $num = $this->input->cookie('commit_'.$test_id);
+                if ($num == 99) {
+                    $num = 99;
+                } else {
+                    $num += 2;
+                }
+                $this->input->set_cookie(array('name' => 'commit_'.$test_id, 'value' => $num, 'expire' => 600));
+            }
+            exit(json_encode(array('status' => true, 'content' => '部署中', 'process' => $num)));
         }
     }
 }
