@@ -608,11 +608,11 @@ class Commit extends CI_Controller {
             $output = json_decode($api['output'], true);
             if (!$output['status']) {
                 log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':提测记录不存在.id[ '.$id.' ]');
-                show_error('提测记录不存在', 500, '错误');
+                exit(json_encode(array('status' => false, 'error' => '提测记录不存在')));
             }
         } else {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提测记录异常.HTTP_CODE['.$api['httpcode'].']');
-            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
 
         //打队列
@@ -622,7 +622,7 @@ class Commit extends CI_Controller {
           $repos = unserialize($repos);
         }
         $log_filename = 'deploy_staging_'.$repos[$output['content']['repos_id']]['repos_name'].'_'.str_replace('/', '_', $output['content']['br']).'_'.$output['content']['test_flag'];
-        $api = $this->curl->get($system['queue_host'].'/?name=deploy_staging&opt=put&data='.$env_id.'|'.$output['content']['repos_id'].'|'.$output['content']['br'].'|'.$output['content']['test_flag'].'&auth=mypass123');
+        $api = $this->curl->get($system['queue_host'].'/?name=deploy_staging&opt=put&data='.$env_id.'|'.$output['content']['repos_id'].'|'.str_replace('/', ':::', $output['content']['br']).'|'.$output['content']['test_flag'].'&auth=mypass123');
         if ($api['httpcode'] == 200) {
             if ($api['output'] != 'HTTPSQS_PUT_OK') {
                 log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入提醒异常-'.$api['output']);
@@ -641,17 +641,36 @@ class Commit extends CI_Controller {
      */
     public function get_process()
     {
+        $test_id = $this->input->get('testid');
+        $env_id = $this->input->get('env');
         $file = $this->input->get('file');
         $flag_file = APPPATH.'cache/'.$file.'_flag.log';
         if (file_exists($flag_file)) {
             $flag = file_get_contents($flag_file);
             if ($flag) {
-                exit(json_encode(array('status' => true, 'content' => '部署成功')));
+                //锁定任务状态
+                $this->config->load('extension', TRUE);
+                $system = $this->config->item('system', 'extension');
+                $this->load->library('curl', array('token'=>$system['access_token']));
+
+                //获取提测信息
+                $api = $this->curl->get($system['api_host'].'/commit/zhanyong?id='.$test_id.'&user='.UID.'&env='.$env_id);
+                if ($api['httpcode'] == 200) {
+                    $output = json_decode($api['output'], true);
+                    if (!$output['status']) {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':占用失败.id[ '.$id.' ]');
+                        exit(json_encode(array('status' => false, 'error' => '占用失败')));
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提测记录异常.HTTP_CODE['.$api['httpcode'].']');
+                    exit(json_encode(array('status' => false, 'error' => '占用API接口异常.HTTP_CODE['.$api['httpcode'].']')));
+                }
+                exit(json_encode(array('status' => true, 'content' => '部署成功', 'process' => '100')));
             } else {
-                exit(json_encode(array('status' => false, 'content' => '部署失败')));
+                exit(json_encode(array('status' => false, 'error' => '部署失败')));
             }
         } else {
-            exit(json_encode(array('status' => true, 'content' => '50')));
+            exit(json_encode(array('status' => true, 'content' => '部署中', 'process' => '50')));
         }
     }
 }

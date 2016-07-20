@@ -102,7 +102,7 @@
     </div><!--row -->
   </div><!-- contentpanel -->
 </div><!-- mainpanel -->
-  
+  <?php include('common_tab.php');?>
 </section>
 
 <?php include('common_js.php');?>

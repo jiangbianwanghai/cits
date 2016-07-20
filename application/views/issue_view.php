@@ -194,35 +194,35 @@
                 ?>
                 <tr id="tr-<?php echo $value['id'];?>" class="unread">
                   <td><a href="/conf/profile/<?php echo $value['add_user'];?>" class="pull-left"><div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="添加人：<?php echo $users[$value['add_user']]['realname'];?>"></div></a></td>
-                  <td></td>
-                  <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a>'; }?> @<?php echo $value['test_flag'];?><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?>
+                  <td><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?></td>
+                  <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a>@'.$value['br']; }?> #<?php echo $value['test_flag'];?>
                   </td>
                   <td width="120">
                     <?php if ($value['rank'] == 0) {?>
-                    <button class="btn btn-default btn-xs"><i class="fa fa-coffee"></i> 开发环境</button>
+                    <button class="btn btn-default btn-xs" id="rank-<?php echo $value['id'];?>"><i class="fa fa-coffee"></i> 开发环境</button>
                     <?php } ?>
                     <?php if ($value['rank'] == 1) {?>
-                    <button class="btn btn-primary btn-xs tooltips" data-toggle="tooltip" title="<?php echo $env[$value['env']]['ip'];?>"><?php if ($value['state'] == 5) { ?><i class="fa fa-exclamation-circle"></i> <s><?php echo $env[$value['env']]['name'];?></s><?php } else {?><i class="fa fa-check-circle"></i> <?php echo $env[$value['env']]['name'];?><?php } ?></button>
+                    <button class="btn btn-primary btn-xs tooltips" id="rank-<?php echo $value['id'];?>" data-toggle="tooltip" title="<?php echo $env[$value['env']]['ip'];?>"><?php if ($value['state'] == 5) { ?><i class="fa fa-exclamation-circle"></i> <s><?php echo $env[$value['env']]['name'];?></s><?php } else {?><i class="fa fa-check-circle"></i> <?php echo $env[$value['env']]['name'];?><?php } ?></button>
                     <?php } ?>
                     <?php if ($value['rank'] == 2) {?>
-                    <button class="btn btn-success btn-xs"><i class="fa fa-check-circle"></i> 生产环境</button>
+                    <button class="btn btn-success btn-xs" id="rank-<?php echo $value['id'];?>"><i class="fa fa-check-circle"></i> 生产环境</button>
                     <?php } ?>
                   </td>
                   <td width="90">
                     <?php if ($value['state'] == 0) {?>
-                    <button class="btn btn-default btn-xs"><i class="fa fa-coffee"></i> 待测</button>
+                    <button class="btn btn-default btn-xs" id="state-<?php echo $value['id'];?>"><i class="fa fa-coffee"></i> 待测</button>
                     <?php } ?>
                     <?php if ($value['state'] == 1) {?>
-                    <button class="btn btn-primary btn-xs"><i class="fa fa-clock-o"></i> 测试中…</button>
+                    <button class="btn btn-primary btn-xs" id="state-<?php echo $value['id'];?>"><i class="fa fa-clock-o"></i> 测试中…</button>
                     <?php } ?>
                     <?php if ($value['state'] == -3) {?>
-                    <button class="btn btn-danger btn-xs"><i class="fa fa-exclamation-circle"></i> 不通过</button>
+                    <button class="btn btn-danger btn-xs" id="state-<?php echo $value['id'];?>"><i class="fa fa-exclamation-circle"></i> 不通过</button>
                     <?php } ?>
                     <?php if ($value['state'] == 3) {?>
-                    <button class="btn btn-success btn-xs"><i class="fa fa-check-circle"></i> 通过</button>
+                    <button class="btn btn-success btn-xs" id="state-<?php echo $value['id'];?>"><i class="fa fa-check-circle"></i> 通过</button>
                     <?php } ?>
                     <?php if ($value['state'] == 5) {?>
-                    <button class="btn btn-success btn-xs"><i class="fa fa-exclamation-circle"></i> 已被后续版本覆盖</button>
+                    <button class="btn btn-success btn-xs" id="state-<?php echo $value['id'];?>"><i class="fa fa-exclamation-circle"></i> 已被后续版本覆盖</button>
                     <?php } ?>
                   </td>
                   <td width="240">
@@ -483,7 +483,7 @@
   <p class="text-right"><small>页面执行时间 <em>{elapsed_time}</em> 秒 使用内存 {memory_usage}</small></p>  
 </div><!-- contentpanel -->
 </div><!-- mainpanel -->
-  
+  <?php include('common_tab.php');?>
 </section>
 
 <div class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -616,18 +616,49 @@
         env = $(this).attr('data-value');
         $.ajax({
           type: "GET",
-          url: "/commit/env?testId="+id+"&envId="+env,
+          url: "/commit/env?id="+id+"&env="+env,
           dataType: "JSON",
           success: function(data){
             if (data.status) {
-              jQuery.gritter.add({
-                title: '提醒',
-                text: data.message,
-                class_name: 'growl-success',
-                sticky: false,
-                time: ''
+              var get_process = window.setInterval(function(){
+                $.ajax({
+                type: "GET",
+                url: "/commit/get_process?file="+data.content+"&testid="+id+"&env="+env,
+                dataType: "JSON",
+                success: function(data){
+                  if (data.status) {
+                    if (data.process == '100') {
+                      jQuery.gritter.add({
+                        title: '提醒',
+                        text: data.content,
+                        class_name: 'growl-success',
+                        sticky: false,
+                        time: ''
+                      });
+                      clearInterval(get_process);
+                      $("#rank-"+id).text('测试环境');
+                      $("#state-"+id).text('测试中');
+                    } else {
+                      jQuery.gritter.add({
+                        title: '部署进度',
+                        text: data.content+data.process,
+                        class_name: 'growl-success',
+                        sticky: false,
+                        time: '500'
+                      });
+                    }
+                  } else {
+                    jQuery.gritter.add({
+                      title: '提醒',
+                      text: data.error,
+                      class_name: 'growl-danger',
+                      sticky: false,
+                      time: ''
+                    });
+                  };
+                }
               });
-              
+              }, 500); 
             } else {
               jQuery.gritter.add({
                 title: '提醒',
