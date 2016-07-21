@@ -65,6 +65,21 @@ class Plan extends CI_Controller {
         $data['workflow'] = $this->config->item('workflow', 'extension');
         $data['workflowfilter'] = $this->config->item('workflowfilter', 'extension');
         $data['tasktype'] = $this->config->item('tasktype', 'extension');
+        $data['tasktypefilter'] = $this->config->item('tasktypefilter', 'extension');
+
+        $filter = '';
+        if ($data['flow'] && $data['flow'] != 'all') {
+            if ($filter) {
+                $filter .= '|';
+            }
+            $filter .= 'workflow,'.$data['workflowfilter'][$data['flow']]['id'];
+        }
+        if ($data['type'] && $data['type'] != 'all') {
+            if ($filter) {
+                $filter .= '|';
+            }
+            $filter .= 'type,'.$data['tasktypefilter'][$data['type']];
+        }
 
         //根据项目ID获取计划列表
         $data['planFolder'] = array();
@@ -100,7 +115,7 @@ class Plan extends CI_Controller {
         $data['total'] = 0;
         if ($data['curr_plan']) {
             //根据计划和项目id读取任务列表
-            $api = $this->curl->get($system['api_host'].'/issue/rows_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0');
+            $api = $this->curl->get($system['api_host'].'/issue/rows_by_plan?projectid='.$this->_projectid.'&planid='.$data['curr_plan']['id'].'&offset=0&filter='.$filter);
             if ($api['httpcode'] == 200) {
                 $output = json_decode($api['output'], true);
                 if ($output['status']) {

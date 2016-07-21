@@ -74,10 +74,10 @@
                     </button>
                     <ul class="dropdown-menu">
                       <?php if ($type) {?>
-                      <li><a href="/plan<?php echo '?curr_plan='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
+                      <li><a href="/plan<?php echo '?planid='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>"><i class="glyphicon glyphicon-folder-open mr5"></i> 查看全部</a></li>
                       <?php } ?>
-                      <?php if ($type != 'task' || !$type) {?><li><a href="/plan<?php echo '?curr_plan='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>&type=task"><i class="glyphicon glyphicon-folder-open mr5"></i> TASK</a></li><?php } ?>
-                      <?php if ($type != 'bug' || !$type) {?><li><a href="<?php echo '?curr_plan='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>&type=bug"><i class="glyphicon glyphicon-folder-open mr5"></i> BUG</a></li><?php } ?>
+                      <?php if ($type != 'TASK' || !$type) {?><li><a href="/plan<?php echo '?planid='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>&type=TASK"><i class="glyphicon glyphicon-folder-open mr5"></i> TASK</a></li><?php } ?>
+                      <?php if ($type != 'BUG' || !$type) {?><li><a href="<?php echo '?planid='.alphaid($curr_plan['id']);?><?php if ($flow) echo '&flow='.$flow;?>&type=BUG"><i class="glyphicon glyphicon-folder-open mr5"></i> BUG</a></li><?php } ?>
                     </ul>
                   </div>
                 </div>
