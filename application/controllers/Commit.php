@@ -380,22 +380,23 @@ class Commit extends CI_Controller {
         $this->load->library('curl');
         $res = $this->curl->get($sqsUrl);
         if ($res['httpcode'] != 200)
-            exit(json_encode(array('status' => false, 'error' => '消息队列出现异常', 'code' => 1001)));
+            exit(json_encode(array('status' => false, 'error' => '消息队列出现异常')));
 
-        //等待2秒中，让worker把查询结果写入缓存
-        sleep(2);
-
-        //获取生成的缓存文件并解析它
         $cacheFile = APPPATH.'cache/repos_'.$id.'_tree.log';
-        if (!file_exists($cacheFile))
-            exit(json_encode(array('status' => false, 'error' => '文件不存在', 'code' => 1002)));
+        //循环验证缓存文件是否生成
+        while(1) {
+            if (file_exists($cacheFile)) {
+                break;
+            }
+            usleep(500);
+        }
 
         $con = file_get_contents($cacheFile);
         if ($con)
         $conArr = unserialize($con);
 
         if (!$conArr)
-            exit(json_encode(array('status' => false, 'error' => '格式异常', 'code' => 1003)));
+            exit(json_encode(array('status' => false, 'error' => '格式异常')));
 
         $str = '';
         foreach ($conArr as $key => $value) {
@@ -435,13 +436,19 @@ class Commit extends CI_Controller {
         $this->load->library('curl');
         $res = $this->curl->get($sqsUrl);
         if ($res['httpcode'] != 200)
-            exit(json_encode(array('status' => false, 'error' => '消息队列出现异常', 'code' => 1001)));
+            exit(json_encode(array('status' => false, 'error' => '消息队列出现异常')));
 
-        //等待2秒中，让worker把查询结果写入缓存
-        sleep(2);
+        $cacheFile = APPPATH."/cache/repos_".$id."_".str_replace('/', '_', $branch)."_commit.xml";
+        //循环验证缓存文件是否生成
+        while(1) {
+            if (file_exists($cacheFile)) {
+                break;
+            }
+            usleep(500);
+        }
         header("content-type:text/html;charset=utf-8");
         $dom = new DOMDocument(); 
-        $dom->load(APPPATH."/cache/repos_".$id."_".str_replace('/', '_', $branch)."_commit.xml");
+        $dom->load($cacheFile);
         $messages = $dom->getElementsByTagName('logentry');
         $arrInfos = array(); 
         foreach ($messages as $book) 
