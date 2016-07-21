@@ -60,7 +60,7 @@ th,td{white-space:nowrap;}
                       <td><?php echo ($offset + $key + 1); ?></td>
                       <td><?php if ($value['type'] == 2) {?><i class="fa fa-bug tooltips" data-toggle="tooltip" title="BUG"></i><?php } ?><?php if ($value['type'] == 1) {?><i class="fa fa-magic tooltips" data-toggle="tooltip" title="TASK"></i><?php } ?></td>
                       <td><?php echo '<span class="label label-'.$workflow[$value['workflow']]['span_color'].'">'.$workflow[$value['workflow']]['name'].'</span>'; ?></td>
-                      <td><?php if ($value['level']) {?><?php echo "<strong style='color:#ff0000;' title='".$level[$value['level']]['alt']."'>".$level[$value['level']]['name']."</strong> ";?><?php } ?> <a href="/issue/view/<?php echo alphaid($value['id']);?>" target="_blank"><?php echo $value['issue_name'];?></a></span></td>
+                      <td><?php if ($value['level']) {?><?php echo "<strong style='color:#ff0000;' title='".$level[$value['level']]['alt']."'>".$level[$value['level']]['name']."</strong> ";?><?php } ?> <a href="/issue/view/<?php echo alphaid($value['id']);?>"><?php echo $value['issue_name'];?></a></span></td>
                       <td><?php if ($value['plan_id'] && isset($planarr[$value['plan_id']])) { echo '<a href="/plan?planid='.alphaid($value['plan_id']).'">'.$planarr[$value['plan_id']]['plan_name'].'</a>'; } ?></td>
                       <td><?php if ($value['project_id'] && isset($project[$value['project_id']])) { echo $project[$value['project_id']]['project_name']; } ?></td>
                       <td>

@@ -79,7 +79,7 @@ class User extends CI_Controller {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':输出bug统计API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => '输bug统计API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
-        
+
         if ($report) {
             foreach ($report as $key => $value) {
                 $tmp[] = $key;
@@ -132,16 +132,22 @@ class User extends CI_Controller {
     {
         $data['PAGE_TITLE'] = '操作记录';
 
-        $offset = $this->uri->segment(3, 0);
+        $uid = $this->uri->segment(3, 0);
+        $offset = $this->uri->segment(4, 0);
 
         //读取系统配置信息
         $this->load->helper('alphaid');
+        if ($uid) {
+            $uid = alphaid($uid, 1);
+        } else {
+            $uid = UID;
+        }
         $data['logs'] = array('total' => 0, 'data' => array());
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $config = $this->config->item('pages', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
-        $api = $this->curl->get($system['api_host'].'/handle/get_rows?uid='.UID.'&offset='.$offset.'&limit='.$config['per_page']);
+        $api = $this->curl->get($system['api_host'].'/handle/get_rows?uid='.$uid.'&offset='.$offset.'&limit='.$config['per_page']);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -193,7 +199,7 @@ class User extends CI_Controller {
         $this->load->library('pagination');
         $config['total_rows'] = $data['logs']['total'];
         $config['cur_page'] = $offset;
-        $config['base_url'] = '/user/log';
+        $config['base_url'] = '/user/log/'.alphaid($uid);
         $this->pagination->initialize($config);
         $data['pages'] = $this->pagination->create_links();
         $data['offset'] = $offset;

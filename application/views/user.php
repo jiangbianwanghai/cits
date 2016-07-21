@@ -29,14 +29,14 @@
                 <small><i class="fa fa-map-marker"></i> <?php echo $profile['username']; ?></small>
               </div>
               <blockquote class="serif italic text-center">
-                工作岗位：研发人员
+                <a href="/user/log/<?php echo alphaid($profile['uid']); ?>">TA的操作记录</a>
               </blockquote>
               <div class="row">
                 <div class="col-xs-6 text-center">
-                  <span>注册时间：<br /><?php echo date("Y/m/d H:i:s", $profile['add_time']); ?></span>
+                  <span>注册时间：<br /><?php echo date("m/d H:i:s", $profile['add_time']); ?></span>
                 </div>
                 <div class="col-xs-6 text-center">
-                  <span>最后登录时间：<br /><?php if ($profile['last_login_time']) { echo date("Y/m/d H:i:s", $profile['last_login_time']); } else { echo '-'; } ?></span>
+                  <span>最后登录时间：<br /><?php if ($profile['last_login_time']) { echo date("m/d H:i:s", $profile['last_login_time']); } else { echo '-'; } ?></span>
                 </div>
               </div>
             </div>
