@@ -385,10 +385,10 @@ class Commit extends CI_Controller {
         $cacheFile = APPPATH.'cache/repos_'.$id.'_tree.log';
         //循环验证缓存文件是否生成
         while(1) {
+            usleep(500);
             if (file_exists($cacheFile)) {
                 break;
             }
-            usleep(500);
         }
 
         $con = file_get_contents($cacheFile);
@@ -441,10 +441,10 @@ class Commit extends CI_Controller {
         $cacheFile = APPPATH."/cache/repos_".$id."_".str_replace('/', '_', $branch)."_commit.xml";
         //循环验证缓存文件是否生成
         while(1) {
+            usleep(500);
             if (file_exists($cacheFile)) {
                 break;
             }
-            usleep(500);
         }
         header("content-type:text/html;charset=utf-8");
         $dom = new DOMDocument(); 
