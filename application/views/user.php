@@ -23,10 +23,10 @@
               <div class="cover"><img src="<?php echo STATIC_HOST; ?>/images/photos/photo2.png" alt="Cover Photo" /></div>
             </div>
             <div class="panel-body">
-              <img src="<?php echo AVATAR_HOST.'/'.USER_NAME.'.jpg'; ?>" class="widget-profile-img thumbnail" width="80" height="80" alt="80x80" />
+              <img src="<?php echo AVATAR_HOST.'/'.$profile['username'].'.jpg'; ?>" class="widget-profile-img thumbnail" width="80" height="80" alt="80x80" />
               <div class="widget-profile-title">
-                <h4><?php echo REAL_NAME; ?></h4>
-                <small><i class="fa fa-map-marker"></i> <?php echo USER_NAME; ?></small>
+                <h4><?php echo $profile['realname']; ?></h4>
+                <small><i class="fa fa-map-marker"></i> <?php echo $profile['username']; ?></small>
               </div>
               <blockquote class="serif italic text-center">
                 工作岗位：研发人员

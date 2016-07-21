@@ -14,12 +14,20 @@ class User extends CI_Controller {
     {
         $data['PAGE_TITLE'] = '用户面板';
 
+        $uid = $this->uri->segment(3, 0);
+        $this->load->helper('alphaid');
+        if ($uid) {
+            $uid = alphaid($uid, 1);
+        } else {
+            $uid = UID;
+        }
+
         //读取个人信息
         $this->config->load('extension', TRUE);
         $system = $this->config->item('system', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
 
-        $api = $this->curl->get($system['api_host'].'/user/row?uid='.UID);
+        $api = $this->curl->get($system['api_host'].'/user/row?uid='.$uid);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -35,7 +43,7 @@ class User extends CI_Controller {
         $report = array();
 
         //输出受理统计
-        $api = $this->curl->get($system['api_host'].'/report/accept?uid='.UID);
+        $api = $this->curl->get($system['api_host'].'/report/accept?uid='.$uid);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -54,7 +62,7 @@ class User extends CI_Controller {
         }
 
         //输出bug统计
-        $api = $this->curl->get($system['api_host'].'/report/bug?uid='.UID);
+        $api = $this->curl->get($system['api_host'].'/report/bug?uid='.$uid);
         if ($api['httpcode'] == 200) {
             $output = json_decode($api['output'], true);
             if ($output['status']) {
@@ -71,7 +79,7 @@ class User extends CI_Controller {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':输出bug统计API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => '输bug统计API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
-        //print_r($report);
+        
         if ($report) {
             foreach ($report as $key => $value) {
                 $tmp[] = $key;

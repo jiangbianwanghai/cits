@@ -11,6 +11,7 @@
       <li<?php if ($this->uri->segment(1, '') == 'issue') echo ' class="active"';?>><a href="/issue"><i class="fa fa-tasks"></i> <span>任务管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'commit') echo ' class="active"';?>><a href="/commit"><i class="fa fa-cloud-upload"></i> <span>提测管理</span></a></li>
       <li<?php if ($this->uri->segment(1, '') == 'repos') echo ' class="active"';?>><a href="/repos"><i class="fa fa-suitcase"></i> <span>代码库管理</span></a></li>
+      <li><a href="http://192.168.8.223:5000/inception_table_structure" target="_blank"><i class="fa fa-gavel"></i> <span>SQL语法审核系统</span></a></li>
     </ul>
   </div><!-- leftpanelinner -->
 </div><!-- leftpanel -->

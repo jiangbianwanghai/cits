@@ -60,22 +60,22 @@
               <tr>
                 <td>
                   <?php if ($accept_user && isset($accept_user['1'])) { ?>
-                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['1']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['1']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['1']['accept_user']]['realname'];?></a>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['1']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/user/index/<?php echo alphaid($accept_user['1']['accept_user']);?>" target="_blank"><?php echo $users[$accept_user['1']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
                 <td colspan="<?php if ($bug['total']) {echo 4;}else{echo 2;}?>">
                   <?php if ($accept_user && isset($accept_user['2'])) { ?>
-                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['2']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['2']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['2']['accept_user']]['realname'];?></a>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['2']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/user/index/<?php echo alphaid($accept_user['2']['accept_user']);?>" target="_blank"><?php echo $users[$accept_user['2']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
                 <td colspan="2">
                   <?php if ($accept_user && isset($accept_user['3'])) { ?>
-                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['3']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['3']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['3']['accept_user']]['realname'];?></a>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['3']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/user/index/<?php echo alphaid($accept_user['3']['accept_user']);?>" target="_blank"><?php echo $users[$accept_user['3']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
                 <td>
                   <?php if ($accept_user && isset($accept_user['4'])) { ?>
-                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['4']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/conf/profile/<?php echo $accept_user['4']['accept_user'];?>" target="_blank"><?php echo $users[$accept_user['4']['accept_user']]['realname'];?></a>
+                  <span class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$accept_user['4']['accept_user']]['username'];?>.jpg" align="absmiddle" title=""></span> <a href="/user/index/<?php echo alphaid($accept_user['4']['accept_user']);?>" target="_blank"><?php echo $users[$accept_user['4']['accept_user']]['realname'];?></a>
                   <?php } else { echo 'N/A'; } ?>
                 </td>
               </tr>
