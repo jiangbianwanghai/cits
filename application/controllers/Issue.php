@@ -1003,16 +1003,18 @@ class Issue extends CI_Controller {
             if ($output_handle['status']) {
                 
                 //发送提醒
-                $Post_data_notify['user'] = $uid;
-                $Post_data_notify['log_id'] = $output_handle['content'];
-                $api_notify = $this->curl->post($system['api_host'].'/notify/write', $Post_data_notify);
-                if ($api_notify['httpcode'] == 200) {
-                    $output_notify = json_decode($api_notify['output'], true);
-                    if (!$output_notify['status']) {
-                        echo '写入通知异常-'.$output_notify['error'].PHP_EOL;
+                if ($uid != UID) {
+                    $Post_data_notify['user'] = $uid;
+                    $Post_data_notify['log_id'] = $output_handle['content'];
+                    $api_notify = $this->curl->post($system['api_host'].'/notify/write', $Post_data_notify);
+                    if ($api_notify['httpcode'] == 200) {
+                        $output_notify = json_decode($api_notify['output'], true);
+                        if (!$output_notify['status']) {
+                            echo '写入通知异常-'.$output_notify['error'].PHP_EOL;
+                        }
+                    } else {
+                        echo '写入提醒API异常.HTTP_CODE['.$api_notify['httpcode'].']'.PHP_EOL;
                     }
-                } else {
-                    echo '写入提醒API异常.HTTP_CODE['.$api_notify['httpcode'].']'.PHP_EOL;
                 }
 
             } else {
