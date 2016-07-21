@@ -131,7 +131,7 @@
                 <?php if (($issue_profile['workflow'] == 2 || $issue_profile['workflow'] == 4)&& $accept_user && isset($accept_user['3']) && $accept_user['3']['accept_user'] == UID) {?>
                 <td style="text-align:center;" id="td-test"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger test">我要测试</a></td>
                 <?php } elseif ($issue_profile['workflow'] == 2 && $accept_user && !isset($accept_user['3']) && $accept_user['2']['accept_user'] == UID) {?>
-                <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
+                <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="3" data-title="指定受理人"></a></td>
                 <?php } else {?>
                 <td style="text-align:center;">测试中</td>
                 <?php } ?>
@@ -158,7 +158,7 @@
                 <?php if ($issue_profile['workflow'] == 6 && $accept_user && isset($accept_user['4']) && $accept_user['4']['accept_user'] == UID) {?>
                 <td style="text-align:center;" id="td-online"><a href="javascript:;" ids="<?php echo $issueid; ?>" class="label label-danger onlines">通知上线</a></td>
                 <?php } elseif ($issue_profile['workflow'] == 6 && $accept_user && !isset($accept_user['4']) && $accept_user['3']['accept_user'] == UID) {?>
-                <td style="text-align:center;"><a href="javascript:;" id="test_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
+                <td style="text-align:center;"><a href="javascript:;" id="online_user" data-type="select2" data-value="0" data-title="指定受理人"></a></td>
                 <?php } else {?>
                 <td style="text-align:center;">上线</td>
                 <?php } ?>
@@ -944,21 +944,38 @@
 
     //指定测试人员
     jQuery('#test_user').editable({
-        inputclass: 'sel-xs',
-        source: countries,
-        type: 'text',
-        pk: 1,
-        ajaxOptions: {
-          type: 'GET'
-        },
-        url: '/issue/change_accept/<?php echo $issueid;?>',
-        send: 'always',
-        select2: {
-            width: 150,
-            placeholder: '更改受理人',
-            allowClear: true
-        },
-    });
+          inputclass: 'sel-xs',
+          source: countries,
+          type: 'text',
+          pk: 3,
+          ajaxOptions: {
+            type: 'GET'
+          },
+          url: '/issue/change_accept/<?php echo $issueid;?>/',
+          send: 'always',
+          select2: {
+              width: 150,
+              placeholder: '更改受理人',
+              allowClear: true
+          },
+      });
+    //指定上线人员
+    jQuery('#online_user').editable({
+          inputclass: 'sel-xs',
+          source: countries,
+          type: 'text',
+          pk: 4,
+          ajaxOptions: {
+            type: 'GET'
+          },
+          url: '/issue/change_accept/<?php echo $issueid;?>/',
+          send: 'always',
+          select2: {
+              width: 150,
+              placeholder: '更改受理人',
+              allowClear: true
+          },
+      });
     
     jQuery('#country').editable({
         inputclass: 'sel-xs',

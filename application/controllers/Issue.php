@@ -934,6 +934,7 @@ class Issue extends CI_Controller {
         //获取参数
         $id = $this->uri->segment(3, 0);
         $uid = $this->input->get("value", TRUE);
+        $role = $this->input->get("pk", TRUE);
         $this->load->helper(array('alphaid', 'timediff'));
         $id = alphaid($id, 1);
         $uid = alphaid($uid, 1);
@@ -964,7 +965,7 @@ class Issue extends CI_Controller {
         //写入受理表
         $Post_data_accept['accept_user'] = $uid;
         $Post_data_accept['issue_id'] = $id;
-        $Post_data_accept['flow'] = 3;
+        $Post_data_accept['flow'] = $role;
         $api = $this->curl->post($system['api_host'].'/accept/write', $Post_data_accept);
         if ($api['httpcode'] == 200) {
             $output_accept = json_decode($api['output'], true);
