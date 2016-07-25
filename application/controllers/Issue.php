@@ -1135,7 +1135,7 @@ class Issue extends CI_Controller {
         $this->load->library('pagination');
         $config['total_rows'] = $data['rows']['total'];
         $config['cur_page'] = $offset;
-        $config['base_url'] = '/bug/star/';
+        $config['base_url'] = '/issue/star/';
         $this->pagination->initialize($config);
         $data['pages'] = $this->pagination->create_links();
         $data['offset'] = $offset;

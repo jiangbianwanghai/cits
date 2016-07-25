@@ -123,7 +123,7 @@
                           } else {
                             $day = date('Y-m-d', $value['add_time']).' 星期'.$weekarray[date("w",$value['add_time'])];
                           }
-                          echo '<tr><td colspan="10"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
+                          echo '<tr><td colspan="9"><span class="fa fa-calendar"></span> 创建时间：'.$day.'</td></tr>';
                         }
                         $timeGroup[$timeDay] = 1;
                   ?>
@@ -155,7 +155,7 @@
                     </td>
                     <td align="center" width="30px">
                         <?php if ($value['type'] == 2) {?><i class="fa fa-bug tooltips" data-toggle="tooltip" title="BUG"></i><?php } ?><?php if ($value['type'] == 1) {?><i class="fa fa-magic tooltips" data-toggle="tooltip" title="TASK"></i><?php } ?>
-                      </td>
+                    </td>
                     <td>
                       <?php if ($value['level']) {?><?php echo "<strong style='color:#ff0000;' title='".$level[$value['level']]['alt']."'>".$level[$value['level']]['name']."</strong> ";?><?php } ?> <a href="/issue/view/<?php echo alphaid($value['id']);?>"><?php echo $value['issue_name'];?></a>
                     </td>
