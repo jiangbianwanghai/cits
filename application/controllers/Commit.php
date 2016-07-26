@@ -355,7 +355,7 @@ class Commit extends CI_Controller {
      */
     public function getbr() 
     {
-
+        set_time_limit(0);
         //获取输入的参数
         $id = $this->uri->segment(3, 0);
 
@@ -392,8 +392,9 @@ class Commit extends CI_Controller {
         }
 
         $con = file_get_contents($cacheFile);
-        if ($con)
-        $conArr = unserialize($con);
+        if ($con) {
+            $conArr = unserialize($con);
+        }
 
         if (!$conArr)
             exit(json_encode(array('status' => false, 'error' => '格式异常')));
@@ -411,6 +412,7 @@ class Commit extends CI_Controller {
      */
     public function getcommit() 
     {
+        set_time_limit(0);
         //获取输入的参数
         $id = $this->input->post('id');
         $branch = $this->input->post('branch');
@@ -445,6 +447,7 @@ class Commit extends CI_Controller {
             if (file_exists($cacheFile)) {
                 break;
             }
+            usleep(1000);
         }
         header("content-type:text/html;charset=utf-8");
         $dom = new DOMDocument(); 

@@ -192,7 +192,7 @@ jQuery(document).ready(function(){
           $("#br").html(data.output);
           $("#br-loading").text('');
         } else {
-          $("#br-loading").html("<small>error:"+data.error+" code:"+data.code+"</small>");
+          $("#br-loading").html("<small>error:"+data.error+"</small>");
         }
       }
     });
@@ -212,7 +212,7 @@ jQuery(document).ready(function(){
           $("#commit").html(data.output);
           $("#commit-loading").text('');
         } else {
-          $("#commit-loading").html("<small>error:"+data.error+" code:"+data.code+"</small>");
+          $("#commit-loading").html("<small>error:"+data.error+"</small>");
         }
       }
     });
