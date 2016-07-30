@@ -105,6 +105,7 @@ class Repos extends CI_Controller {
         $Post_data['repos_url'] = $this->input->post('repos_url');
         $Post_data['repos_summary'] = $this->input->post('repos_summary');
         $Post_data['merge'] = $this->input->post('merge');
+        $Post_data['type'] = $this->input->post('type');
         $Post_data['add_user'] = UID;
         $api = $this->curl->post($system['api_host'].'/repos/write', $Post_data);
         if ($api['httpcode'] == 200) {

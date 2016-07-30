@@ -440,7 +440,7 @@ class Commit extends CI_Controller {
         if ($res['httpcode'] != 200)
             exit(json_encode(array('status' => false, 'error' => '消息队列出现异常')));
 
-        $cacheFile = APPPATH."/cache/repos_".$id."_".str_replace('/', '_', $branch)."_commit.xml";
+        $cacheFile = APPPATH."cache/repos_".$id."_".str_replace('/', '_', $branch)."_commit.xml";
         //循环验证缓存文件是否生成
         while(1) {
             usleep(500);
@@ -454,22 +454,40 @@ class Commit extends CI_Controller {
         $dom->load($cacheFile);
         $messages = $dom->getElementsByTagName('logentry');
         $arrInfos = array(); 
-        foreach ($messages as $book) 
-        {
-            $revision = $book->getAttribute('revision'); 
-            $author = $book->getElementsByTagName('author'); 
-            $author = $author->item(0)->nodeValue; 
-            $date = $book->getElementsByTagName('date'); 
-            $date = $date->item(0)->nodeValue;       
-            $arrInfo['revision'] = $revision;
-            $arrInfo['author'] = $author;
-            $arrInfo['date'] = date("Y-m-d H:i:s", strtotime($date));
-            $arrInfos[] = $arrInfo; 
+        //兼容gc.style没有填写author的例外。
+        if ($id == 43) {
+            foreach ($messages as $book) 
+            {
+                $revision = $book->getAttribute('revision'); 
+                $date = $book->getElementsByTagName('date'); 
+                $date = $date->item(0)->nodeValue;       
+                $arrInfo['revision'] = $revision;
+                $arrInfo['date'] = date("Y-m-d H:i:s", strtotime($date));
+                $arrInfos[] = $arrInfo; 
+            }
+            $str = '';
+            foreach ($arrInfos as $key => $value) {
+                $str .='<option value="'.$value['revision'].'">'.$value['revision'].':::'.$value['date'].'</option>';
+            }
+        } else {
+            foreach ($messages as $book) 
+            {
+                $revision = $book->getAttribute('revision'); 
+                $author = $book->getElementsByTagName('author'); 
+                $author = $author->item(0)->nodeValue; 
+                $date = $book->getElementsByTagName('date'); 
+                $date = $date->item(0)->nodeValue;       
+                $arrInfo['revision'] = $revision;
+                $arrInfo['author'] = $author;
+                $arrInfo['date'] = date("Y-m-d H:i:s", strtotime($date));
+                $arrInfos[] = $arrInfo; 
+            }
+            $str = '';
+            foreach ($arrInfos as $key => $value) {
+                $str .='<option value="'.$value['revision'].'">'.$value['revision'].':::'.$value['author'].':::'.$value['date'].'</option>';
+            }
         }
-        $str = '';
-        foreach ($arrInfos as $key => $value) {
-            $str .='<option value="'.$value['revision'].'">'.$value['revision'].':::'.$value['author'].':::'.$value['date'].'</option>';
-        }
+        
         $callBack = array('status' => true, 'output' => $str);
         echo json_encode($callBack);
     }
@@ -610,7 +628,7 @@ class Commit extends CI_Controller {
         $system = $this->config->item('system', 'extension');
         $env = $this->config->item('env', 'extension');
         $this->load->library('curl', array('token'=>$system['access_token']));
-        $env_id = $env[$env_id]['code'];
+        $env_ip = $env[$env_id]['ip'];
 
         //获取提测信息
         $api = $this->curl->get($system['api_host'].'/commit/profile?id='.$test_id);
@@ -632,7 +650,7 @@ class Commit extends CI_Controller {
           $repos = unserialize($repos);
         }
         $log_filename = 'deploy_staging_'.$repos[$output['content']['repos_id']]['repos_name'].'_'.str_replace('/', '_', $output['content']['br']).'_'.$output['content']['test_flag'];
-        $api = $this->curl->get($system['queue_host'].'/?name=deploy_staging&opt=put&data='.$env_id.'|'.$output['content']['repos_id'].'|'.str_replace('/', ':::', $output['content']['br']).'|'.$output['content']['test_flag'].'&auth=mypass123');
+        $api = $this->curl->get($system['queue_host'].'/?name=deploy_staging&opt=put&data='.$env_ip.'|'.$output['content']['repos_id'].'|'.str_replace('/', ':::', $output['content']['br']).'|'.$output['content']['test_flag'].'&auth=mypass123');
         if ($api['httpcode'] == 200) {
             if ($api['output'] != 'HTTPSQS_PUT_OK') {
                 log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入提醒异常-'.$api['output']);
@@ -657,6 +675,7 @@ class Commit extends CI_Controller {
         $flag_file = APPPATH.'cache/'.$file.'_flag.log';
         if (file_exists($flag_file)) {
             $flag = file_get_contents($flag_file);
+            $flag = intval($flag);
             if ($flag) {
                 //锁定任务状态
                 $this->config->load('extension', TRUE);

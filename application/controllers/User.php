@@ -79,7 +79,7 @@ class User extends CI_Controller {
             log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':输出bug统计API异常.HTTP_CODE['.$api['httpcode'].']');
             exit(json_encode(array('status' => false, 'error' => '输bug统计API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
-
+        $report_tmp = array();
         if ($report) {
             foreach ($report as $key => $value) {
                 $tmp[] = $key;

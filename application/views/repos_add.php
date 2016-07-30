@@ -55,6 +55,16 @@
                   </div>
                 </div>
                 <div class="form-group">
+                  <label class="col-sm-3 control-label">类型 <span class="asterisk">*</span></label>
+                  <div class="col-sm-9">
+                    <select id="type" name="type" class="select3" data-placeholder="请选择类型" required>
+                      <option value=""></option>
+                      <option value="git">git</option>
+                      <option value="svn">svn</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
                   <label class="col-sm-3 control-label">说明 <span class="asterisk">*</span></label>
                   <div class="col-sm-9">
                     <textarea id="repos_summary" name="repos_summary" rows="5" class="form-control" placeholder="请简要说明代码库的作用" required></textarea>
@@ -102,6 +112,8 @@
 <script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/uploader.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/hotkeys.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/simditor-2.3.6/scripts/simditor.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/simple-pinyin.js"></script>
+<script src="<?php echo STATIC_HOST; ?>/js/select2.min.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/custom.js"></script>
 <script src="<?php echo STATIC_HOST; ?>/js/cits.js"></script>
 <script>
@@ -135,6 +147,11 @@ function callBack(data) {
 }
 
 jQuery(document).ready(function(){
+
+  jQuery(".select3").select2({
+      width: '100%',
+      minimumResultsForSearch: -1
+  });
 
   $("#basicForm").submit(function(){
     $(this).ajaxSubmit({
