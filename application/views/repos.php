@@ -49,7 +49,7 @@
                   foreach ($rows['data'] as $value) {
               ?>
               <tr id="tr-<?php echo alphaid($value['id']);?>">
-              <td style="padding-top: 20px;">[<?php echo $value['type']; ?>]<a href="/test/repos/<?php echo alphaid($value['id']);?>"><?php echo $value['repos_name'];?></a></td>
+              <td style="padding-top: 20px;">[<?php echo $value['type']; ?>]<a href="/commit/repos/<?php echo alphaid($value['id']);?>"><?php echo $value['repos_name'];?></a></td>
               <td><input type="text" value="<?php echo $value['repos_url'];?>" id="readonlyinput" readonly="readonly" title="<?php echo $value['repos_url'];?>" data-toggle="tooltip" data-trigger="hover" class="form-control tooltips" /></td>
               <td style="padding-top: 20px"><a href="javascript:;" class="view label label-warning" data-toggle="modal" data-target="#code_detail" testid="<?php echo alphaid($value['id']);?>">查看详情</a>
               </td>

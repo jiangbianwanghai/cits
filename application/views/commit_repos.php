@@ -12,13 +12,13 @@
     }
     ?>
     <div class="pageheader">
-      <h2><i class="fa fa-cloud-upload"></i> 提测管理 <span>当前项目的提测列表</span></h2>
+      <h2><i class="fa fa-cloud-upload"></i> 提测管理 <span><?php echo $repos[$repos_id]['repos_name'].'的'; ?>提测列表</span></h2>
       <div class="breadcrumb-wrapper">
         <span class="label">你的位置:</span>
         <ol class="breadcrumb">
           <li><a href="/">CITS</a></li>
           <li><a href="/commit">提测管理</a></li>
-          <li class="active">当前项目的提测列表</li>
+          <li class="active"><?php echo $repos[$repos_id]['repos_name'].'的'; ?>提测列表</li>
         </ol>
       </div>
     </div>
@@ -49,12 +49,12 @@
                   </button>
                   <ul class="dropdown-menu">
                     <?php if ($state != 'all') {?>
-                    <li><a href="/commit/index/<?php echo $folder;?>/all/<?php echo $status; ?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
+                    <li><a href="/commit/repos/<?php echo $id;?>/all/<?php echo $status; ?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
                     <?php } ?>
                     <?php 
                     foreach ($commitstate as $key => $value) {
                       if ($state != $value['en_name']) {
-                        echo '<li><a href="/commit/index/'.$folder.'/'.$value['en_name'].'/'.$status.'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
+                        echo '<li><a href="/commit/repos/'.$id.'/'.$value['en_name'].'/'.$status.'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
                       }
                     }
                     ?>
@@ -67,12 +67,12 @@
                   </button>
                   <ul class="dropdown-menu">
                     <?php if ($status != 'all') {?>
-                    <li><a href="/commit/index/<?php echo $folder;?>/<?php echo $state;?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
+                    <li><a href="/commit/repos/<?php echo $id;?>/<?php echo $state;?>"><i class="glyphicon glyphicon-folder-close mr5"></i> 查看全部状态</a></li>
                     <?php } ?>
                     <?php 
                     foreach ($commitstatus as $key => $value) {
                       if ($status != $value['en_name']) {
-                        echo '<li><a href="/commit/index/'.$folder.'/'.$state.'/'.$value['en_name'].'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
+                        echo '<li><a href="/commit/repos/'.$id.'/'.$state.'/'.$value['en_name'].'"><i class="glyphicon glyphicon-folder-close mr5"></i> '.$value['name'].'</a></li>';
                       }
                     }
                     ?>
@@ -81,7 +81,7 @@
               </div>
             </div><!-- pull-right -->
             <?php } ?>
-            <h5 class="subtitle mb5">提测列表</h5>
+            <h5 class="subtitle mb5"><?php echo $repos[$repos_id]['repos_name'].'的'; ?>提测列表</h5>
             <?php if (($rows['total']-$offset) < $per_page) { $per_page_end = $rows['total']-$offset; } else { $per_page_end = $per_page; }?>
             <p class="text-muted">查询结果：<?php echo ($offset+1).' - '.($per_page_end+$offset).' of '.$rows['total'];?></p>
             <div class="table-responsive">

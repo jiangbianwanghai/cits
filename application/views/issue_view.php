@@ -195,7 +195,7 @@
                 <tr id="tr-<?php echo $value['id'];?>" class="unread">
                   <td><a href="/user/index/<?php echo alphaid($value['add_user']);?>" class="pull-left"><div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="添加人：<?php echo $users[$value['add_user']]['realname'];?>"></div></a></td>
                   <td id="process-<?php echo $value['id'];?>"><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?></td>
-                  <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a>@'.$value['br']; }?> #<?php echo $value['test_flag'];?>
+                  <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/commit/repos/'.alphaid($value['repos_id']).'">'.$repos[$value['repos_id']]['repos_name'].'</a>@'.$value['br']; }?> #<?php echo $value['test_flag'];?>
                   </td>
                   <td width="120">
                     <?php if ($value['rank'] == 0) {?>
@@ -654,7 +654,7 @@
                   };
                 }
               });
-              }, 1000); 
+              }, 2000); 
             } else {
               jQuery.gritter.add({
                 title: '提醒',
