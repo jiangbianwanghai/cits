@@ -513,20 +513,18 @@
               jQuery.gritter.add({
                 title: '提醒',
                 text: data.message,
-                  class_name: 'growl-success',
-                  image: '/static/images/screen.png',
+                class_name: 'growl-success',
                 sticky: false,
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 2000);
             } else {
               jQuery.gritter.add({
                 title: '提醒',
-                text: data.message,
-                  class_name: 'growl-danger',
-                  image: '/static/images/screen.png',
+                text: data.error,
+                class_name: 'growl-danger',
                 sticky: false,
                 time: ''
               });

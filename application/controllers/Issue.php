@@ -515,6 +515,72 @@ class Issue extends CI_Controller {
     {
         $this->__init();
 
+        //解析url传值
+        $this->load->helper('alphaid');
+        $id = $this->uri->segment(3, 0);
+        $id = alphaid($id, 1);
+
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+
+        //读取任务
+        $api = $this->curl->get($system['api_host'].'/issue/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $profile = $output['content'];
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':任务不存在.id[ '.$id.' ]');
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取任务信息异常.HTTP_CODE['.$api['httpcode'].']');
+            show_error('API异常.HTTP_CODE['.$api['httpcode'].']', 500, '错误');
+        } 
+
+        $api = $this->curl->get($system['api_host'].'/issue/del?id='.$id.'&user='.UID);
+        if ($api['httpcode'] == 200) {
+            if ($output['status']) {
+                //写入操作日志
+                $Post_data_handle['sender'] = UID;
+                $Post_data_handle['action'] = '删除';
+                $Post_data_handle['target'] = $id;
+                $Post_data_handle['target_type'] = 3;
+                $Post_data_handle['type'] = 1;
+                $Post_data_handle['subject'] = $profile['issue_name'];
+                $Post_data_handle['content'] = serialize($profile);
+                $api = $this->curl->post($system['api_host'].'/handle/write', $Post_data_handle);
+                if ($api['httpcode'] == 200) {
+                    $output_handle = json_decode($api['output'], true);
+                    if ($output_handle['status']) {
+                        //发送通知提醒
+                        $api = $this->curl->get($system['queue_host'].'/?name=notify&opt=put&data='.$output_handle['content'].'|'.$id.'|3|'.UID.'&auth=mypass123'); //格式:log_id|target_id|target_type|sender_id
+                        if ($api['httpcode'] == 200) {
+                            if ($api['output'] != 'HTTPSQS_PUT_OK') {
+                                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入通知异常-'.$api['output']);
+                            }
+                        } else {
+                            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':打队列API异常.HTTP_CODE['.$api['httpcode'].']');
+                        }
+                    } else {
+                        log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志异常-'.$output_handle['error']);
+                    }
+                } else {
+                    log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':写入操作日志API异常.HTTP_CODE['.$api['httpcode'].']');
+                }
+                exit(json_encode(array('status' => true, 'message' => '删除成功')));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':删除失败.id[ '.$id.' ]');
+                exit(json_encode(array('status' => false, 'error' => '删除失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':删除任务API接口异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '删除任务API接口异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //写入操作日志
+
+
     }
 
     /**
