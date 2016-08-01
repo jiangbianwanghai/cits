@@ -621,6 +621,7 @@ class Commit extends CI_Controller {
      */
     public function env()
     {
+        $this->load->helper('alphaid');
         $test_id = $this->input->get('id');
         $env_id = $this->input->get('env');
 
@@ -643,6 +644,18 @@ class Commit extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
         }
 
+        //验证环境是否被占用
+        $api = $this->curl->get($system['api_host'].'/commit/check_free?reposid='.$output['content']['repos_id'].'&env='.$env_id);
+        if ($api['httpcode'] == 200) {
+            $output_check = json_decode($api['output'], true);
+            if ($output_check['status']) {
+                exit(json_encode(array('status' => false, 'error' => '前面有占用的任务。<a href="/issue/view/'.alphaid($output_check['content']['issue_id']).'" target="_blank">查看任务</a>')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提测记录异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+        
         //打队列
         $repos = array();
         if (file_exists(APPPATH.'cache/repos.cache.php')) {
@@ -799,5 +812,47 @@ class Commit extends CI_Controller {
         $data['online_users'] = $onlineUsers;
 
         $this->load->view('commit_repos', $data);
+    }
+
+    public function change_tice()
+    {
+        $this->__init();
+
+        $this->load->helper('alphaid');
+        $id = $this->uri->segment(3, 0);
+        $id = alphaid($id, 1);
+        $tice = $this->uri->segment(4, 0);
+
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+
+        //获取提测信息
+        $api = $this->curl->get($system['api_host'].'/commit/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if (!$output['status']) {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':提测记录不存在.id[ '.$id.' ]');
+                exit(json_encode(array('status' => false, 'error' => '提测记录不存在')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提测记录异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
+        //获取提测信息
+        $api = $this->curl->get($system['api_host'].'/commit/change_tice?id='.$id.'&user='.UID.'&tice='.$tice);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                exit(json_encode(array('status' => true, 'message' => '操作成功')));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':操作失败.id[ '.$id.' ]');
+                exit(json_encode(array('status' => false, 'error' => '操作失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':更改提测状态API接口异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '更改提测状态API接口异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
     }
 }

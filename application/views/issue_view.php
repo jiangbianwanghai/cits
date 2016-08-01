@@ -227,9 +227,8 @@
                   </td>
                   <td width="240">
                     <?php if ($value['status'] == 1) {?>
-                    <div class="btn-group nomargin">
                       <?php if ($value['rank'] == 0) { ?>
-                      <div class="btn-group nomargin">
+                      <div class="btn-group">
                         <button type="button" class="btn btn-white btn-sm dropdown-toggle" data-toggle="dropdown">
                           占用测试环境 <span class="caret"></span>
                         </button>
@@ -243,31 +242,18 @@
                       </div>
                       <?php } ?>
                       <?php if ($value['rank'] == 1) { ?>
-                      <div class="btn-group nomargin">
+                      <div class="btn-group">
                         <button type="button" class="btn btn-white btn-sm dropdown-toggle" data-toggle="dropdown">
                           更改提测状态 <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
-                          <li><a href="javascript:;" class="wait" testid="<?php echo $value['id']?>">我暂时不测了</a></li>
-                          <li><a href="javascript:;" class="pass" testid="<?php echo $value['id']?>">测试不通过</a></li>
-                          <li><a href="javascript:;" class="launch" testid="<?php echo $value['id']?>">测试通过待上线</a></li>
-                          <li><a href="javascript:;" class="online" testid="<?php echo $value['id']?>">代码已上线</a></li>
+                          <li><a href="javascript:;" class="wait" testid="<?php echo alphaid($value['id']); ?>">我暂时不测了</a></li>
+                          <li><a href="javascript:;" class="pass" testid="<?php echo alphaid($value['id']); ?>">测试不通过</a></li>
+                          <li><a href="javascript:;" class="launch" testid="<?php echo alphaid($value['id']); ?>">测试通过待上线</a></li>
+                          <li><a href="javascript:;" class="online" testid="<?php echo alphaid($value['id']); ?>">代码已上线</a></li>
                         </ul>
                       </div>
                       <?php } ?>
-                      <?php if ($value['rank'] < 2) { ?>
-                      <div class="btn-group nomargin">
-                        <button type="button" class="btn btn-white btn-sm dropdown-toggle" data-toggle="dropdown">
-                          获取部署代码 <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu">
-                          <li><a href="javascript:;" class="deploy" env="192.168.8.190" br="<?php echo str_replace('branches/', '', $value['br']);?>" rev="<?php echo $value['test_flag'];?>" repos="<?php echo $repos[$value['repos_id']]['repos_name'];?>" merge="<?php echo $repos[$value['repos_id']]['merge']?>" ids="<?php echo $value['id']?>">190（测试环境01）</a></li>
-                          <li><a href="javascript:;" class="deploy" env="192.168.8.192" br="<?php echo str_replace('branches/', '', $value['br']);?>" rev="<?php echo $value['test_flag'];?>" repos="<?php echo $repos[$value['repos_id']]['repos_name'];?>" merge="<?php echo $repos[$value['repos_id']]['merge']?>" ids="<?php echo $value['id']?>">192（测试环境02）</a></li>
-                          <li><a href="javascript:;" class="deploy" env="192.168.8.193" br="<?php echo str_replace('branches/', '', $value['br']);?>" rev="<?php echo $value['test_flag'];?>" repos="<?php echo $repos[$value['repos_id']]['repos_name'];?>" merge="<?php echo $repos[$value['repos_id']]['merge']?>" ids="<?php echo $value['id']?>">193（测试环境03）</a></li>
-                        </ul>
-                      </div>
-                      <?php } ?>
-                    </div>
                     </div>
                     <?php }?>
                   </td>
@@ -570,7 +556,7 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 1000);
             } else {
               jQuery.gritter.add({
@@ -675,7 +661,7 @@
         id = $(this).attr("testid");
         $.ajax({
           type: "GET",
-          url: "/test/change_tice/"+id+"/online",
+          url: "/commit/change_tice/"+id+"/online",
           dataType: "JSON",
           success: function(data){
             if (data.status) {
@@ -687,12 +673,12 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 2000);
             } else {
               jQuery.gritter.add({
                 title: '提醒',
-                text: data.message,
+                text: data.error,
                   class_name: 'growl-danger',
                 sticky: false,
                 time: ''
@@ -708,7 +694,7 @@
         id = $(this).attr("testid");
         $.ajax({
           type: "GET",
-          url: "/test/change_tice/"+id+"/wait",
+          url: "/commit/change_tice/"+id+"/wait",
           dataType: "JSON",
           success: function(data){
             if (data.status) {
@@ -720,12 +706,12 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 2000);
             } else {
               jQuery.gritter.add({
                 title: '提醒',
-                text: data.message,
+                text: data.error,
                 class_name: 'growl-danger',
                 sticky: false,
                 time: ''
@@ -741,7 +727,7 @@
         id = $(this).attr("testid");
         $.ajax({
           type: "GET",
-          url: "/test/change_tice/"+id+"/pass",
+          url: "/commit/change_tice/"+id+"/pass",
           dataType: "JSON",
           success: function(data){
             if (data.status) {
@@ -753,12 +739,12 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 2000);
             } else {
               jQuery.gritter.add({
                 title: '提醒',
-                text: data.message,
+                text: data.error,
                   class_name: 'growl-danger',
                 sticky: false,
                 time: ''
@@ -775,7 +761,7 @@
         id = $(this).attr("testid");
         $.ajax({
           type: "GET",
-          url: "/test/change_tice/"+id+"/launch",
+          url: "/commit/change_tice/"+id+"/launch",
           dataType: "JSON",
           success: function(data){
             if (data.status) {
@@ -787,12 +773,12 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 2000);
             } else {
               jQuery.gritter.add({
                 title: '提醒',
-                text: data.message,
+                text: data.error,
                   class_name: 'growl-danger',
                 sticky: false,
                 time: ''
@@ -821,12 +807,12 @@
                 time: ''
               });
               setTimeout(function(){
-                location.href = data.url;
+                location.href = window.location.href;
               }, 2000);
             } else {
               jQuery.gritter.add({
                 title: '提醒',
-                text: data.message,
+                text: data.error,
                   class_name: 'growl-danger',
                 sticky: false,
                 time: ''
