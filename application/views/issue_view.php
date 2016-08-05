@@ -192,7 +192,7 @@
                         echo '<tr><td colspan="8"><span class="fa fa-cloud-upload"></span> '.$repos[$value['repos_id']]['repos_name'].'</td></tr>';
                       }
                 ?>
-                <tr id="tr-<?php echo $value['id'];?>" class="unread">
+                <tr id="tr-<?php echo alphaid($value['id']);?>" class="unread">
                   <td><a href="/user/index/<?php echo alphaid($value['add_user']);?>" class="pull-left"><div class="face"><img alt="" src="<?php echo AVATAR_HOST.'/'.$users[$value['add_user']]['username']?>.jpg" align="absmiddle" title="添加人：<?php echo $users[$value['add_user']]['realname'];?>"></div></a></td>
                   <td id="process-<?php echo $value['id'];?>"><?php if ($timeGroup[$value['repos_id']] == 1) { echo ' <span class="badge badge-danger">当前</span>'; } ?></td>
                   <td><?php if ($value['status'] == '-1') { echo '<s><a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/test/repos/'.$value['repos_id'].'">'.$repos[$value['repos_id']]['repos_name'].'</a></s>'; } else { echo '<a title="'.$repos[$value['repos_id']]['repos_url'].'" href="/commit/repos/'.alphaid($value['repos_id']).'">'.$repos[$value['repos_id']]['repos_name'].'</a>@'.$value['br']; }?> #<?php echo $value['test_flag'];?>
@@ -260,8 +260,8 @@
                   <td width="150">
                     <?php if ($issue_profile['status'] == 1) {?>
                     <?php if ($value['tice'] < 1) {?>
-                    <a class="btn btn-white btn-xs" href="/test/edit/<?php echo $issueid;?>/<?php echo $value['id'];?>"><i class="fa fa-pencil"></i> 编辑</a>
-                    <a class="btn btn-white btn-xs delete-row" href="javascript:;" issueid="<?php echo $issueid;?>" testid="<?php echo $value['id'];?>"><i class="fa fa-trash-o"></i> 删除</a>
+                    <a class="btn btn-white btn-xs" href="/commit/edit/<?php echo $issueid;?>/<?php echo $value['id'];?>"><i class="fa fa-pencil"></i> 编辑</a>
+                    <a class="btn btn-white btn-xs delete-row" href="javascript:;" issueid="<?php echo $issueid;?>" testid="<?php echo alphaid($value['id']);?>"><i class="fa fa-trash-o"></i> 删除</a>
                     <?php }?>
                     <?php }?> 
                   </td>
@@ -896,10 +896,9 @@
       var c = confirm("确认要删除吗？");
       if(c) {
         testid = $(this).attr("testid");
-        issueid = $(this).attr("issueid");
         $.ajax({
           type: "GET",
-          url: "/test/del/"+testid+"/"+issueid,
+          url: "/commit/del/"+testid,
           dataType: "JSON",
           success: function(data){
             if (data.status) {

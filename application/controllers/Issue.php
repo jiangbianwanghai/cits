@@ -578,9 +578,6 @@ class Issue extends CI_Controller {
             exit(json_encode(array('status' => false, 'error' => '删除任务API接口异常.HTTP_CODE['.$api['httpcode'].']')));
         }
 
-        //写入操作日志
-
-
     }
 
     /**

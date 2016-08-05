@@ -348,6 +348,42 @@ class Commit extends CI_Controller {
     {
         $this->__init();
 
+        //解析url传值
+        $this->load->helper('alphaid');
+        $id = $this->uri->segment(3, 0);
+        $id = alphaid($id, 1);
+
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $this->load->library('curl', array('token'=>$system['access_token']));
+
+        //获取提测信息
+        $api = $this->curl->get($system['api_host'].'/commit/profile?id='.$id);
+        if ($api['httpcode'] == 200) {
+            $output = json_decode($api['output'], true);
+            if ($output['status']) {
+                $profile = $output['content'];
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':提测信息不存在.id[ '.$id.' ]');
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':读取提测信息不存在.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => 'API异常.HTTP_CODE['.$api['httpcode'].']')));
+        } 
+
+        $api = $this->curl->get($system['api_host'].'/commit/del?id='.$id.'&user='.UID);
+        if ($api['httpcode'] == 200) {
+            if ($output['status']) {
+                exit(json_encode(array('status' => true, 'message' => '删除成功')));
+            } else {
+                log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':删除失败.id[ '.$id.' ]');
+                exit(json_encode(array('status' => false, 'error' => '删除失败')));
+            }
+        } else {
+            log_message('error', $this->router->fetch_class().'/'.$this->router->fetch_method().':删除提测记录API接口异常.HTTP_CODE['.$api['httpcode'].']');
+            exit(json_encode(array('status' => false, 'error' => '删除提测记录API接口异常.HTTP_CODE['.$api['httpcode'].']')));
+        }
+
     }
 
     /**
@@ -355,7 +391,6 @@ class Commit extends CI_Controller {
      */
     public function getbr() 
     {
-        set_time_limit(0);
         //获取输入的参数
         $id = $this->uri->segment(3, 0);
 
