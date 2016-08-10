@@ -207,4 +207,79 @@ class User extends CI_Controller {
 
         $this->load->view('user_log', $data);
     }
+
+
+    public function avatar()
+    {
+        $data['PAGE_TITLE'] = '修改头像';
+        $this->load->view('user_avatar', $data);
+    }
+
+    /**
+     * 图片上传
+     */
+    public function avatar_upload()
+    {
+        if($_FILES['head_photo']) {
+            $dir_name = date("Ymd", time());
+            $this->config->load('extension', TRUE);
+            $system = $this->config->item('system', 'extension');
+            $dir = $system['avatar_dir'].'/'.$dir_name;
+            if (!is_dir($dir)) mkdir($dir, 0777);
+            $config['upload_path'] = $dir; 
+            $config['file_name'] = 'IMG_'.time();
+            $config['overwrite'] = TRUE;
+            $config["allowed_types"] = 'jpg|jpeg|png|gif';
+            $config["max_size"] = 2048;
+            $this->load->library('upload', $config);
+
+            if(!$this->upload->do_upload('head_photo')) {               
+                $error = $this->upload->display_errors();
+                echo '{"success": false,"msg": "'.$error.'"}';
+            } else {
+                $data['upload_data']=$this->upload->data();
+                $img=$data['upload_data']['file_name'];
+                chmod($dir.'/'.$img, 0777);
+                echo '{"msg": 0000, "error":"", "imgurl": "'.AVATAR_HOST.'/'.$dir_name.'/'.$img.'"}';                              
+            }  
+        }
+    }
+
+    /**
+     * 裁切头像
+     */
+    public function avatar_crop()
+    {
+        $data['PAGE_TITLE'] = '裁切头像';
+        $data['img'] = $this->input->get('img');
+        $this->load->view('user_avatar_crop', $data);
+    }
+
+    public function avatar_submit()
+    {
+        
+        $x = $this->input->post('x');
+        $y = $this->input->post('y');
+        $w = $this->input->post('w');
+        $h = $this->input->post('h');
+        $targ_w = $targ_h = 100;
+        $this->config->load('extension', TRUE);
+        $system = $this->config->item('system', 'extension');
+        $pic_name = str_replace(AVATAR_HOST, '', $this->input->post('pic_name'));
+        $config = array(
+            'filepath' => $system['avatar_dir'],
+            'picname' => $pic_name,
+            'x' => $x,
+            'y' => $y,
+            'w' => $w,
+            'h' => $h,
+            'tw' => $targ_w,
+            'th' => $targ_h,
+            'newfilename' => USER_NAME
+        );
+        $this->load->library('jcrop', $config);
+        $file=$this->jcrop->crop();
+        $file['file'] = str_replace($system['avatar_dir'], AVATAR_HOST, $file['file']).'?'.time();
+        echo json_encode($file);
+    }
 }
