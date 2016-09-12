@@ -76,7 +76,7 @@ if (file_exists(APPPATH.'cache/user.cache.php')) {
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu dropdown-menu-usermenu pull-right">
-            <li><a href="/user/avatar" id="avatar"><i class="glyphicon glyphicon-log-out"></i> 修改头像</a></li>
+            <li><a href="/user/avatar" id="avatar"><i class="glyphicon glyphicon-user"></i> 修改头像</a></li>
             <li><a href="/dashboard/logout" id="logout"><i class="glyphicon glyphicon-log-out"></i> 退出</a></li>
           </ul>
         </div>
